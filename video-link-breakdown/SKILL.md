@@ -9,18 +9,20 @@ Use this skill to turn an arbitrary video link into a structured content teardow
 
 ## Quick Workflow
 
-1. Create a task folder under the current workspace, usually `work/video-link-breakdown/<short-id>/`.
-2. Run:
+1. Resolve the installed skill directory and create a unique temporary task folder:
 
 ```bash
-python3 ~/.codex/skills/video-link-breakdown/scripts/prepare_video_link.py "<video-url>" --out "<task-folder>"
+SKILL_DIR="${CODEX_HOME:-$HOME/.codex}/skills/video-link-breakdown"
+TASK_DIR="$(mktemp -d "${TMPDIR:-/tmp}/video-link-breakdown.XXXXXX")"
+python3 "$SKILL_DIR/scripts/prepare_video_link.py" "<video-url>" --out "$TASK_DIR"
 ```
 
-3. Read `<task-folder>/summary.json`.
-4. If `<task-folder>/contact_sheet.jpg` exists, inspect it with the image viewer before analyzing.
-5. Expect the downloaded source video to be deleted after frames are extracted. Use `--keep-video` only when the user explicitly wants a local archive.
-6. If downloaded video exists but no frames were extracted, try an alternate local media tool only if needed.
-7. If the script reports `needs_user_input`, ask only for the missing artifact: uploaded video file, transcript/subtitles, screenshots, or a platform-accessible mirror.
+2. Read `$TASK_DIR/summary.json`.
+3. If `$TASK_DIR/contact_sheet.jpg` exists, inspect it with the image viewer before analyzing.
+4. Expect the downloaded source video to be deleted after frames are extracted. Use `--keep-video` only when the user explicitly wants a local archive.
+5. If downloaded video exists but no frames were extracted, try an alternate local media tool only if needed.
+6. If the script reports `needs_user_input`, ask only for the missing artifact: uploaded video file, transcript/subtitles, screenshots, or a platform-accessible mirror.
+7. After delivering the analysis, remove `$TASK_DIR` and verify it no longer exists. If cleanup fails, report the remaining path and reason.
 
 ## Analysis Priorities
 
@@ -43,6 +45,8 @@ Cover these sections unless the user asks for a different format:
 Use `yt-dlp` through the script for supported platforms. The script can install missing Python packages into the user site when allowed by the environment. It records failures in `summary.json`; do not keep retrying the same failing method.
 
 Default storage behavior: keep `summary.json`, `metadata.full.json`, extracted frames, and `contact_sheet.jpg`; remove the downloaded video file after successful frame extraction. This minimizes local storage use while preserving enough visual evidence for analysis.
+
+Treat all files in the task folder as temporary evidence. Do not write downloaded media, frames, metadata, or analysis output into the skill directory. Copy a file elsewhere only when the user explicitly asks to keep it.
 
 For TikTok and short-form product videos, `oEmbed`/metadata may provide useful title, creator, thumbnail, sound, and engagement signals even when subtitles are absent. Use these as supporting context, not as a substitute for viewing frames.
 
