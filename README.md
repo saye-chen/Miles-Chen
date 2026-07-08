@@ -18,6 +18,20 @@ Structured, evidence-driven category-entry decisions for cross-border ecommerce.
 
 **Core model (CIDM-2026.08):** 7 dimensions × weighted scoring (100 pts), 5 pre-checks with redline priority, 4 decision tiers, dimension confidence, LTV/content-fit/growth-sustainability calibration. Outputs include full reports, rapid screening cards, link reverse-analysis cards, portfolio comparison tables, country entry matrices, competitor monitoring reports, post-launch decision cards, exit reviews, and phased validation plans.
 
+**Five pre-check gates before scoring:** CIDM does not start from a score. It first tests whether the opportunity can pass five commercial gates. Redlines override the final score.
+
+| Gate | Decision question | Professional judgment points | Formula / model basis |
+|---|---|---|---|
+| Is the market large enough? | Can demand support the target sales scale and operating cadence? | Keyword clusters, trend stability, purchase motivation, repeat/consumable potential, social and marketplace demand signals | Demand evidence triangulation; LTV/frequency adjustment; proxy-signal confidence grading |
+| Can we enter? | Can a new or non-leading seller obtain traffic and break through competition? | Review moat, brand concentration, ad pressure, recent new-product breakthroughs, long-tail entry points | Competition layer analysis; review/recency moat; confidence-adjusted entry score |
+| Can it make money? | Does the product remain profitable after full landed and operating costs? | Product, packaging, duty, inbound, fulfillment, commission, ad, promotion, returns, storage, QC, payment and other costs | `net profit = price - full cost stack`; `break-even ad rate = pre-ad contribution margin / price`; scenario and sensitivity analysis |
+| Can it be sold safely? | Are compliance, IP, platform, safety and return risks controllable? | Regulatory path, certification, restricted/prohibited category, claim/label risk, patent/trademark/copyright exposure, return risk | Redline-first risk gate; mandatory human review triggers; risk-control confidence |
+| Why us? | What concrete wedge makes buyers choose us over incumbents? | VOC pain repetition, competitor promise-experience gap, product/package/service/content wedge, execution feasibility | Wedge validation chain; weakest-assumption test; content-fit and growth-sustainability calibration |
+
+**Scoring and decision math:** each dimension is scored from 0 to 10, then converted to a weighted 100-point score using `weighted score = raw score / 10 × dimension weight`. The seven weights are: market demand 20, competitive entry 20, profit 20, content propagation 10, supply-chain control 10, risk control 10, opportunity window 10. Default decision tiers are: 80-100 enter, 65-79.9 cautious entry / small-scale test, 50-64.9 observe or content test, below 50 do not enter. Low confidence, redlines, or failed pre-checks can downgrade the decision regardless of total score.
+
+**Deterministic calculators:** financial and validation calculations are implemented as auditable scripts, not hidden spreadsheet logic: `profit_model.py` for unit economics and batch break-even, `reverse_funnel.py` for order/click/impression requirements, `portfolio_break_even.py` for minimum portfolio success rate, `portfolio_selector.py` for constrained SKU selection, and `evaluate_experiment.py` for preregistered launch gates.
+
 **Files:**
 
 | Path | Purpose |
@@ -25,7 +39,9 @@ Structured, evidence-driven category-entry decisions for cross-border ecommerce.
 | `SKILL.md` | Full decision framework, scenario routing, scoring model, execution checklist |
 | `agents/openai.yaml` | Codex Skill UI metadata |
 | `scripts/workspace_manager.py` | Create and clean marked temporary workspaces |
-| `scripts/profit_model.py` | Deterministic per-unit profit and break-even ad rate calculator |
+| `scripts/profit_model.py` | Deterministic unit economics, contribution margin and batch break-even calculator |
+| `scripts/reverse_funnel.py` | Reverse funnel calculator for break-even orders, clicks and impressions |
+| `scripts/portfolio_break_even.py` | Minimum success-rate and expected-profit calculator for testing portfolios |
 | `scripts/portfolio_selector.py` | Constrained portfolio selection under budget/SKU limits |
 | `scripts/analyze_voc.py` | Deterministic profiling and aggregation for coded VOC datasets |
 | `scripts/evaluate_experiment.py` | Funnel metrics and preregistered launch-gate evaluator |
@@ -95,6 +111,20 @@ Analyzes short-form video links into structured content teardowns covering scrip
 
 **核心模型（CIDM-2026.08）：** 七维加权评分（100 分制）、五道前置门槛（红线优先）、四档决策阈值、维度置信度、复购/LTV、达人/联盟适配度和增长可持续性校准。交付物包括完整报告、快速初筛卡、链接反查卡、组合对比表、国家进入矩阵、竞品监控月报、上市后决策卡、退出复盘和分阶段验证计划。
 
+**评分前五道前置门槛：** CIDM 不从分数开始，而是先判断机会是否通过五个商业门槛。红线优先于总分。
+
+| 门槛 | 决策问题 | 专业判断点 | 公式 / 模型依据 |
+|---|---|---|---|
+| 市场够大吗 | 需求是否能支撑目标销售规模和经营节奏 | 关键词簇、趋势稳定性、购买动机、复购/耗材潜力、社媒与平台需求信号 | 需求证据三角验证；LTV/购买频次修正；代理信号置信度分级 |
+| 进得去吗 | 新卖家或非头部卖家能否获得流量并突破竞争 | 评论壁垒、品牌集中度、广告压力、近 12 个月新品突破、长尾切入口 | 竞争分层；评论/时间壁垒；置信度调整后的进入性评分 |
+| 能赚钱吗 | 完整成本后是否仍有净利和安全垫 | 产品、包装、关税、头程、履约、佣金、广告、促销、退货、仓储、质检、支付等全成本 | `净利 = 售价 - 全链路成本`；`盈亏平衡广告率 = 扣除广告前贡献利润 ÷ 售价`；三场景与敏感性分析 |
+| 能卖吗 | 合规、IP、平台、安全和退货风险是否可控 | 法规路径、认证、禁限售、宣称/标签、专利/商标/版权、退货风险 | 红线优先风险门槛；人工复核触发规则；风险可控性置信度 |
+| 凭什么是你 | 有什么具体切入楔子让用户选择你而不是竞品 | VOC 反复痛点、竞品承诺-体验落差、产品/包装/服务/内容楔子、执行可行性 | 切入楔子验证链；最弱假设测试；内容适配与增长可持续性校准 |
+
+**评分与决策数学：** 每个维度先打 0-10 原始分，再用 `加权分 = 原始分 ÷ 10 × 权重分值` 转成 100 分制。七维权重为：市场需求 20、竞争可进入性 20、利润空间 20、内容传播 10、供应链可控性 10、风险可控性 10、机会窗口 10。默认四档决策为：80-100 建议进入，65-79.9 谨慎进入 / 小规模测试，50-64.9 仅观察或内容测款，低于 50 不建议进入。低置信度、红线或前置门槛失败时，即使总分较高也必须降级。
+
+**确定性计算工具：** 财务和验证计算使用可审计脚本，不依赖隐藏表格逻辑：`profit_model.py` 计算单位经济与批次盈亏平衡，`reverse_funnel.py` 反推订单/点击/曝光要求，`portfolio_break_even.py` 计算测品组合最低成功率，`portfolio_selector.py` 做预算/SKU 约束下的组合选择，`evaluate_experiment.py` 评估事先注册的测款门槛。
+
 **文件清单：**
 
 | 路径 | 用途 |
@@ -102,7 +132,9 @@ Analyzes short-form video links into structured content teardowns covering scrip
 | `SKILL.md` | 完整决策框架、场景路由、评分模型、执行自检 |
 | `agents/openai.yaml` | Codex Skill 界面元数据 |
 | `scripts/workspace_manager.py` | 安全创建与清理任务临时目录 |
-| `scripts/profit_model.py` | 确定性单件利润与盈亏平衡广告率计算 |
+| `scripts/profit_model.py` | 确定性单位经济、贡献利润与批次盈亏平衡计算 |
+| `scripts/reverse_funnel.py` | 反向漏斗计算，反推盈亏平衡订单、点击与曝光 |
+| `scripts/portfolio_break_even.py` | 测品组合最低成功率与预期利润计算 |
 | `scripts/portfolio_selector.py` | 预算/SKU 约束下的组合优化选择 |
 | `scripts/analyze_voc.py` | 已编码 VOC 数据的确定性质量检查与聚合 |
 | `scripts/evaluate_experiment.py` | 漏斗指标与事先测款门槛评估 |

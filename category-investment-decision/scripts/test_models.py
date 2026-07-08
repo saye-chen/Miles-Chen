@@ -35,11 +35,126 @@ class ProfitModelTests(unittest.TestCase):
         self.assertEqual(data["net_profit"], 50.0)
         self.assertEqual(data["net_margin_pct"], 50.0)
         self.assertEqual(data["break_even_ad_rate_pct"], 70.0)
+        self.assertEqual(data["contribution_margin_per_unit"], 70.0)
 
     def test_rejects_invalid_rate(self):
         result = run_script("profit_model.py", "--price", 10, "--ad-rate", 1.1)
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("rates must be between 0 and 1", result.stderr)
+
+    def test_batch_break_even_from_inline_and_json_costs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "fixed.json"
+            path.write_text(json.dumps({"sample": 60, "creative": 40}), encoding="utf-8")
+            result = run_script(
+                "profit_model.py", "--price", 100, "--product", 20,
+                "--commission-rate", 0.1, "--batch-fixed-costs", 110,
+                "--batch-fixed-costs-json", path,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertEqual(data["batch_fixed_costs"], 210.0)
+        self.assertEqual(data["break_even_units"], 3)
+        self.assertEqual(data["break_even_revenue"], 300.0)
+
+    def test_batch_break_even_flags_negative_contribution(self):
+        result = run_script(
+            "profit_model.py", "--price", 10, "--product", 20,
+            "--batch-fixed-costs", 100,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertIsNone(data["break_even_units"])
+        self.assertEqual(data["batch_break_even_status"], "not_viable_under_current_assumptions")
+
+
+class ReverseFunnelTests(unittest.TestCase):
+    @staticmethod
+    def payload(**overrides):
+        base = {
+            "price": 40,
+            "fixed_costs": {"sample": 100, "creative": 80},
+            "variable_costs": {"product": 8, "logistics": 5},
+            "rates": {"platform_commission": 0.06, "creator_commission": 0.1, "payment": 0.02},
+            "funnel": {"ctr": 0.02, "cvr": 0.025, "actual_impressions": 50000},
+        }
+        base.update(overrides)
+        return base
+
+    def run_payload(self, mode, payload):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "reverse.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            result = run_script("reverse_funnel.py", mode, path)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_standard_reverse_funnel(self):
+        data = self.run_payload("standard", self.payload())
+        self.assertEqual(data["contribution_margin_per_unit"], 19.8)
+        self.assertEqual(data["break_even_units"], 10)
+        self.assertEqual(data["minimum_clicks"], 400)
+        self.assertEqual(data["minimum_impressions"], 20000)
+        self.assertEqual(data["decision_hint"], "CONTINUE")
+
+    def test_creator_mode_outputs_per_creator_gate(self):
+        payload = self.payload(
+            fixed_costs={},
+            sample_cost_per_creator=15,
+            collaboration_fee_per_creator=0,
+            creative_cost_per_creator=20,
+            base_ads_per_creator=10,
+            creator_count=4,
+        )
+        data = self.run_payload("creator", payload)
+        self.assertEqual(data["per_creator_fixed_costs"], 45.0)
+        self.assertEqual(data["portfolio_fixed_costs"], 180.0)
+        self.assertEqual(data["break_even_units_per_creator"], 3)
+        self.assertEqual(data["minimum_impressions_per_creator"], 6000)
+
+    def test_rejects_zero_ctr(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "reverse.json"
+            path.write_text(json.dumps(self.payload(funnel={"ctr": 0, "cvr": 0.02})), encoding="utf-8")
+            result = run_script("reverse_funnel.py", "standard", path)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("funnel.ctr must be positive", result.stderr)
+
+    def test_negative_contribution_stops(self):
+        data = self.run_payload("standard", self.payload(price=10))
+        self.assertIsNone(data["break_even_units"])
+        self.assertEqual(data["decision_hint"], "STOP")
+
+
+class PortfolioBreakEvenTests(unittest.TestCase):
+    def evaluate(self, payload):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "portfolio.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            result = run_script("portfolio_break_even.py", path)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def test_minimum_success_rate_and_budget(self):
+        data = self.evaluate({
+            "test_count": 15,
+            "cost_per_test": 625,
+            "success_value": 90000,
+            "expected_success_rate": 0.03,
+            "budget": 10000,
+        })
+        self.assertEqual(data["minimum_success_rate"], 0.006944)
+        self.assertEqual(data["budget_supported_tests"], 16)
+        self.assertEqual(data["decision_hint"], "CONTINUE")
+        self.assertGreater(data["expected_profit"], 0)
+
+    def test_rejects_zero_success_value(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "portfolio.json"
+            path.write_text(json.dumps({"cost_per_test": 100, "success_value": 0}), encoding="utf-8")
+            result = run_script("portfolio_break_even.py", path)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("success_value must be positive", result.stderr)
 
 
 class PortfolioTests(unittest.TestCase):
