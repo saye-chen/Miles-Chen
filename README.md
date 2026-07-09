@@ -14,7 +14,7 @@ Structured, evidence-driven category-entry decisions for cross-border ecommerce.
 
 **Path:** `category-investment-decision/`
 
-**Scopes supported (25+ scenarios):** category entry, competitor/VOC research, link reverse analysis, multi-candidate portfolio, country localization (US/EU/UK/JP/SEA), trend/seasonal/opportunity screening, platform-specific analysis (Amazon, TikTok Shop, Temu, Shopify/DTC, Walmart, Etsy, eBay, Shopee/Lazada), competitor monitoring, keyword strategy, product monitoring, store gap filling, SKU extension, old-product diagnosis, post-launch scaling, exit review, profit calculation, experiment design, and launch review.
+**Scopes supported (25+ scenarios):** category entry, competitor/VOC research, link reverse analysis, multi-candidate portfolio, country localization (US/EU/UK/JP/SEA), trend/seasonal/opportunity screening, platform-specific analysis (Amazon, TikTok Shop, Temu, Shopify/DTC, Walmart, Etsy, eBay, Shopee/Lazada), competitor monitoring (with category-elastic thresholds, capability attribution, SOV tracking, channel/distributor monitoring and opportunity-window classification), keyword strategy, product monitoring, store gap filling, SKU extension, old-product diagnosis, post-launch scaling (with category-adaptive timelines, phased advertising structure, portfolio interaction checks, passive/active decline distinction and cash-flow veto), exit review, profit calculation, experiment design, and launch review.
 
 **Core model (CIDM-2026.08):** 7 dimensions × weighted scoring (100 pts), 5 pre-checks with redline priority, 4 decision tiers, dimension confidence, LTV/content-fit/growth-sustainability calibration. Outputs include full reports, rapid screening cards, link reverse-analysis cards, portfolio comparison tables, country entry matrices, competitor monitoring reports, post-launch decision cards, exit reviews, and phased validation plans.
 
@@ -56,8 +56,8 @@ Structured, evidence-driven category-entry decisions for cross-border ecommerce.
 | `references/country-localization.md` | US/EU/UK/JP/SEA localization checks |
 | `references/country-routing-universal.md` | Any-country localization fallback and regional split rules |
 | `references/validation-playbooks.md` | Phased testing plans and review framework |
-| `references/post-launch-playbook.md` | Post-launch scale, steady-state, decline and exit decisions |
-| `references/competitor-monitoring.md` | Ongoing competitor monitoring, alerts and monthly report structure |
+| `references/post-launch-playbook.md` | Post-launch scale, steady-state, decline and exit decisions; category-adaptive timelines, phased ad structure, portfolio interaction, passive/active decline distinction, cash-flow veto |
+| `references/competitor-monitoring.md` | Ongoing competitor monitoring with category-elastic thresholds, capability attribution, SOV tracking, channel/distributor monitoring, opportunity-window classification and monthly report structure |
 | `references/keyword-strategy.md` | Keyword classification, lifecycle strategy and traffic-gap application |
 | `references/command-reference.md` | Command-style scene entry points and routing rules |
 | `references/pressure-test-matrix.md` | Ten-scenario regression matrix for report quality and routing coverage |
@@ -73,13 +73,13 @@ Structured, evidence-driven category-entry decisions for cross-border ecommerce.
 
 ### Video Link Breakdown
 
-Professional-grade short-form video teardown at creator/CMO level. Turns any video link into a 12-dimension strategic analysis: second-level rhythm mapping, emotion arc, script beat structure, professional editing grammar, platform-algorithm fit, weighted content scoring, audience segmentation, competitive positioning, monetization funnel, replication cost, A/B hypotheses, and cross-cultural localization.
+Professional-grade short-form video teardown at creator/CMO level. Turns any video link into a 12-dimension strategic analysis: second-level rhythm mapping, emotion arc, script beat structure, professional editing grammar, platform-algorithm fit, weighted content scoring, audience segmentation, competitive positioning, monetization funnel, replication cost, A/B hypotheses, and cross-cultural localization. In cross-border e-commerce mode, adds 4 business dimensions (13–16): product-video fit & commercial viability, e-commerce conversion funnel & unit economics, cross-border localization & compliance, and scalable production & creator matrix design.
 
 **Path:** `video-link-breakdown/`
 
-**Supported platforms:** TikTok, YouTube Shorts, Instagram Reels, X/Twitter videos, Bilibili, Douyin.
+**Supported platforms:** TikTok, YouTube Shorts, Instagram Reels, X/Twitter videos, Bilibili, Douyin, TikTok Shop, Shopee Video, Pinterest Video.
 
-**Special modes:** cross-border localization, account diagnosis, competitor benchmarking, audio-first/podcast teardown.
+**Special modes:** cross-border e-commerce (adds 4 business dimensions + localization + creator matrix), account diagnosis, competitor benchmarking, audio-first/podcast teardown.
 
 **Analysis output:**
 - Basic metadata & engagement signals
@@ -88,19 +88,21 @@ Professional-grade short-form video teardown at creator/CMO level. Turns any vid
 - Emotion arc with peak/valley annotations and retention-rate predictions
 - Beat-by-beat script structure with narrative function and psychology mechanism
 - Professional editing grammar: match cuts, motion continuity, J-cut/L-cut, sound–image counterpoint, visual focus & heat-zone prediction
-- Platform-algorithm fit matrix (Douyin/TikTok vs YouTube Shorts vs Bilibili vs Reels) with hook preference, core metric, and migration notes
+- Platform-algorithm fit matrix (Douyin/TikTok vs YouTube Shorts vs Bilibili vs Reels vs TikTok Shop vs Shopee Video vs Pinterest) with hook preference, core metric, and migration notes; TikTok vs TikTok Shop strategic distinction
 - Audience segmentation: core vs reach demographics, consumption scenario, and decision-type match (impulse vs rational)
 - Competitive positioning: category coordinate, trendsetter/follower/copycat label, differentiation vs Top 10
-- Monetization funnel audit: exposure → play → completion → interaction → conversion → retention, with CTA and landing-page match assessment
-- Weighted content scoring: type-specific weights (product/conversion, knowledge, emotion, entertainment, persona) × 7 dimensions, each with one-line justification
+- Monetization funnel audit: exposure → play → completion → interaction → conversion → retention, with CTA and landing-page match assessment; e-commerce bridge layer (product screen time, selling-point clarity, price anchoring, CTA-to-product path, promise-vs-experience consistency) in cross-border mode
+- Weighted content scoring: type-specific weights (product/conversion, knowledge, emotion, entertainment, persona, e-commerce short-video) × 7 dimensions, each with one-line justification
 - Replication template + execution-cost estimate (equipment, scene, talent, post-production, timeline, budget) + replication-risk warning
 - A/B hypotheses in "assumption → expected impact → trade-off → validation method" format, plus rewritten script or shot list when useful
+- (Cross-border mode) Product-video fit scoring, commercial viability quick-screen, unit economics calculation, ROI estimate, 5-market localization matrix, compliance quick-screen, creator matrix design, and material lifecycle management
+- Optional CIDM integration: when user provides a category investment decision report, video analysis conclusions can write back to CIDM scoring dimensions
 
 **Files:**
 
 | Path | Purpose |
 |---|---|
-| `SKILL.md` | Full 12-dimension analysis framework, special-mode routing, workflow, link handling, output templates, quality gate |
+| `SKILL.md` | Full 12-dimension analysis framework + 4 cross-border business dimensions (13–16), special-mode routing, workflow, link handling, output templates, quality gate |
 | `agents/openai.yaml` | Codex Skill UI metadata |
 | `scripts/prepare_video_link.py` | Video download via yt-dlp, metadata extraction, frame extraction, contact sheet generation |
 
@@ -122,7 +124,7 @@ Professional-grade short-form video teardown at creator/CMO level. Turns any vid
 
 **路径：** `category-investment-decision/`
 
-**支持场景（25+）：** 品类进入、竞品/VOC 情报、链接反查、多候选组合、国家本地化（美国/欧盟/英国/日本/东南亚）、趋势/季节/机会筛选、平台专项分析（Amazon、TikTok Shop、Temu、Shopify/DTC、Walmart、Etsy、eBay、Shopee/Lazada）、竞品监控、关键词策略、店铺补品、老品扩展、老品诊断、上市后放量、退出复盘、利润核算、测款设计与复盘。
+**支持场景（25+）：** 品类进入、竞品/VOC 情报、链接反查、多候选组合、国家本地化（美国/欧盟/英国/日本/东南亚）、趋势/季节/机会筛选、平台专项分析（Amazon、TikTok Shop、Temu、Shopify/DTC、Walmart、Etsy、eBay、Shopee/Lazada）、竞品监控（含品类弹性阈值、竞品能力归因、SOV 追踪、渠道/经销商监控、机会窗口分类）、关键词策略、店铺补品、老品扩展、老品诊断、上市后放量（含品类自适应时间框架、广告结构阶段演进、组合联动检查、被动/主动衰退区分、现金流压力否决）、退出复盘、利润核算、测款设计与复盘。
 
 **核心模型（CIDM-2026.08）：** 七维加权评分（100 分制）、五道前置门槛（红线优先）、四档决策阈值、维度置信度、复购/LTV、达人/联盟适配度和增长可持续性校准。交付物包括完整报告、快速初筛卡、链接反查卡、组合对比表、国家进入矩阵、竞品监控月报、上市后决策卡、退出复盘和分阶段验证计划。
 
@@ -164,8 +166,8 @@ Professional-grade short-form video teardown at creator/CMO level. Turns any vid
 | `references/country-localization.md` | 美/欧/英/日/东南亚本地化检查 |
 | `references/country-routing-universal.md` | 任意国家本地化兜底与区域拆分规则 |
 | `references/validation-playbooks.md` | 分阶段测款与复盘框架 |
-| `references/post-launch-playbook.md` | 上市后放量、稳态、衰退与退出决策 |
-| `references/competitor-monitoring.md` | 竞品持续监控、告警和月报结构 |
+| `references/post-launch-playbook.md` | 上市后放量、稳态、衰退与退出决策；品类自适应时间框架、广告结构阶段演进、组合联动检查、被动/主动衰退区分、现金流压力否决 |
+| `references/competitor-monitoring.md` | 竞品持续监控，含品类弹性阈值、竞品能力归因、SOV 追踪、渠道/经销商监控、机会窗口分类与月报结构 |
 | `references/keyword-strategy.md` | 关键词分类、生命周期策略与流量缺口应用 |
 | `references/command-reference.md` | 命令式场景入口与路由规则 |
 | `references/pressure-test-matrix.md` | 报告质量与路由覆盖的 10 场景回归矩阵 |
@@ -181,13 +183,13 @@ Professional-grade short-form video teardown at creator/CMO level. Turns any vid
 
 ### 视频链接拆解
 
-面向创作者/CMO 级别的专业短视频深度拆解。将任意视频链接转化为十二维度战略分析：秒级节奏图谱、情绪曲线、脚本节拍结构、专业剪辑语法、平台算法适配、加权内容评分、受众分层、竞争格局定位、变现漏斗、复刻成本、A/B 假设与跨文化本地化。
+面向创作者/CMO 级别的专业短视频深度拆解。将任意视频链接转化为十二维度战略分析：秒级节奏图谱、情绪曲线、脚本节拍结构、专业剪辑语法、平台算法适配、加权内容评分、受众分层、竞争格局定位、变现漏斗、复刻成本、A/B 假设与跨文化本地化。跨境电商模式下追加四个商业维度（第十三至十六维度）：产品-视频匹配度与商业可行性、电商转化漏斗与单位经济、跨境本地化与合规、规模化生产与达人矩阵适配。
 
 **路径：** `video-link-breakdown/`
 
-**支持平台：** TikTok、YouTube Shorts、Instagram Reels、X/Twitter 视频、Bilibili、抖音。
+**支持平台：** TikTok、YouTube Shorts、Instagram Reels、X/Twitter 视频、Bilibili、抖音、TikTok Shop、Shopee Video、Pinterest Video。
 
-**特殊模式：** 出海/本地化分析、账号诊断、竞品对标、纯音频/播客型拆解。
+**特殊模式：** 跨境电商（追加 4 个商业维度 + 本地化 + 达人矩阵）、账号诊断、竞品对标、纯音频/播客型拆解。
 
 **分析输出：**
 - 基础元数据与互动信号
@@ -196,18 +198,20 @@ Professional-grade short-form video teardown at creator/CMO level. Turns any vid
 - 情绪曲线：标注峰值/低谷，预测各节点留存率
 - 节拍级脚本结构：每拍的叙事功能与心理学机制
 - 专业剪辑语法：匹配剪辑、运动连贯性、J-cut/L-cut、声画对位、视觉焦点与热区预测
-- 平台算法适配矩阵：抖音/TikTok vs YouTube Shorts vs B站 vs Reels 的钩子偏好、核心指标、迁移建议
+- 平台算法适配矩阵：抖音/TikTok vs YouTube Shorts vs B站 vs Reels vs TikTok Shop vs Shopee Video vs Pinterest 的钩子偏好、核心指标、迁移建议；TikTok 与 TikTok Shop 战略区别说明
 - 受众分层：核心/扩散人群、消费场景、决策类型匹配（冲动型 vs 理性型）
 - 竞争格局：品类坐标、定义者/跟风者/搬运者定位、与 Top 10 的共性与差异
-- 变现漏斗审计：曝光→播放→完播→互动→转化→留存，CTA 与承接页匹配度评估
-- 加权内容评分：按带货/知识/情绪/娱乐/人设五类分配权重，七维度逐项评分并附一句话依据
+- 变现漏斗审计：曝光→播放→完播→互动→转化→留存，CTA 与承接页匹配度评估；跨境电商模式增加电商衔接层（产品出现时间占比、卖点传达清晰度、价格锚定、CTA 跳转路径、视频承诺与实际体验一致性）
+- 加权内容评分：按带货/知识/情绪/娱乐/人设/电商短视频六类分配权重，七维度逐项评分并附一句话依据
 - 可复刻模板 + 执行成本评估（设备、场景、演员、后期、周期、预算）+ 复刻风险提示
 - A/B 假设：采用"假设→预期影响→Trade-off→验证方式"四段式，必要时附改写脚本或分镜
+- （跨境电商模式）产品-视频匹配度评分、商业可行性快筛、单位经济快算、ROI 区间预估、五市场本地化矩阵、合规快筛、达人矩阵设计、素材生命周期管理
+- 可选 CIDM 对接：用户提供品类投资决策报告时，视频分析结论可回写 CIDM 评分维度
 
 **文件清单：**
 
 | 路径 | 用途 |
 |---|---|
-| `SKILL.md` | 完整十二维度分析框架、特殊模式路由、工作流、链接处理、输出模板、交付自检 |
+| `SKILL.md` | 完整十二维度分析框架 + 跨境电商模式四维度（十三至十六）、特殊模式路由、工作流、链接处理、输出模板、交付自检 |
 | `agents/openai.yaml` | Codex Skill 界面元数据 |
 | `scripts/prepare_video_link.py` | 视频下载（yt-dlp）、元数据提取、关键帧提取、联系表生成 |
