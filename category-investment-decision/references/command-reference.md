@@ -63,3 +63,18 @@ python3 scripts/portfolio_break_even.py input.json
 ```
 
 这些脚本只计算用户提供或报告明确假设的输入，不自动补行业阈值。输出必须回写到利润、验证动作、停止条件或组合决策中。
+
+## 确定性脚本完整清单
+
+| 脚本 | 用途 | 何时使用 | 调用示例 |
+|---|---|---|---|
+| `scripts/profit_model.py` | 单位经济、贡献利润、盈亏平衡广告率、批次盈亏平衡 | 任何需要利润测算的场景；不要手算多场景表格 | `python3 scripts/profit_model.py --price 39.99 --product 7 --fulfillment 6 --commission-rate 0.06 --batch-fixed-costs 330` |
+| `scripts/reverse_funnel.py` | 目标订单/点击/曝光反推、达人端口漏斗 | TikTok Shop 达人寄样、视频投流、小批量测试；CTR/CVR 缺证据时写假设区间 | `python3 scripts/reverse_funnel.py standard input.json` 或 `python3 scripts/reverse_funnel.py creator input.json` |
+| `scripts/portfolio_break_even.py` | 组合最低成功率与期望利润 | 月度测品池、候选组合预算或成功率门槛不清时 | `python3 scripts/portfolio_break_even.py input.json` |
+| `scripts/portfolio_selector.py` | 预算与执行能力约束下的 SKU 组合选择 | 多候选比较且受预算/SKU 数量约束时 | `python3 scripts/portfolio_selector.py input.json --desired 3` |
+| `scripts/evaluate_experiment.py` | 预注册测款门槛复盘 | 按事先门槛复盘测款实验，输出 Go/Iterate/Stop/Inconclusive | `python3 scripts/evaluate_experiment.py input.json` |
+| `scripts/analyze_voc.py` | 已编码 VOC 证据的可重复聚合 | 系统化分析评论、差评、QA、客服数据并识别痛点 | `python3 scripts/analyze_voc.py input.csv --output result.json` |
+| `scripts/workspace_manager.py` | 临时工作区安全创建与清理 | 复杂任务的临时目录管理；支持 create/cleanup/cleanup-task/list | `python3 scripts/workspace_manager.py create --slug task-slug --task-id id` |
+| `scripts/test_models.py` | 回归测试套件 | 版本升级、demo、压测或质量回归时运行 | `python3 scripts/test_models.py` |
+
+使用任何脚本前先 `--help` 查看完整参数说明。脚本只计算用户提供或报告明确假设的输入，不自动补行业阈值。

@@ -85,6 +85,7 @@ def extract_frames(video_path: Path, out_dir: Path, samples: int, install_missin
         fps = float(meta.get("fps") or 30)
         duration = float(meta.get("duration") or 0)
         if duration <= 0:
+            # Fallback: assume 8 seconds when metadata duration is unavailable or zero
             duration = 8
         times = [duration * i / max(samples - 1, 1) for i in range(samples)]
         saved: list[dict[str, Any]] = []
@@ -180,9 +181,12 @@ def main() -> int:
     try:
         with yt_dlp.YoutubeDL(meta_opts) as ydl:
             info = ydl.extract_info(args.url, download=False)
-        assert isinstance(info, dict)
-        summary["info"] = compact_info(info)
-        (out_dir / "metadata.full.json").write_text(json.dumps(info, ensure_ascii=False, indent=2, default=str))
+        if not isinstance(info, dict):
+            summary["errors"].append("metadata extraction returned non-dict result (geo-blocked, private, or unsupported URL)")
+            info = {}
+        else:
+            summary["info"] = compact_info(info)
+            (out_dir / "metadata.full.json").write_text(json.dumps(info, ensure_ascii=False, indent=2, default=str))
     except Exception as exc:
         summary["errors"].append(f"metadata extraction failed: {exc}")
         info = {}

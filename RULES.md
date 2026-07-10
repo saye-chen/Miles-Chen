@@ -102,6 +102,8 @@ done
 [ -f video-link-breakdown/scripts/test_prepare_video_link.py ] && \
   python3 video-link-breakdown/scripts/test_prepare_video_link.py
 
+python3 scripts/test_cross_skill_integration.py
+
 python3 scripts/validate_repo.py
 
 git diff --check
@@ -275,6 +277,8 @@ done
 
 [ -f video-link-breakdown/scripts/test_prepare_video_link.py ] && \
   python3 video-link-breakdown/scripts/test_prepare_video_link.py
+
+python3 scripts/test_cross_skill_integration.py
 
 python3 scripts/validate_repo.py
 

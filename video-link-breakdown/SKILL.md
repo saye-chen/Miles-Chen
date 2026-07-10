@@ -1,6 +1,6 @@
 ---
 name: video-link-breakdown
-description: 默认用中文对视频链接、上传视频或视频素材执行证据驱动的内容与商业拆解。用于 TikTok、YouTube Shorts、Instagram Reels、X/Twitter、Bilibili、抖音、TikTok Shop、Shopee Video、Pinterest 等平台的单视频拆解、多视频对标、账号诊断、脚本或分镜优化、爆款机制分析、复刻评估、平台适配、跨境本地化、视频带货商业决策、单位经济、达人矩阵与素材规模化；当用户要求分析视频的脚本、剪辑、节奏、钩子、内容质量、受众、变现、复刻价值、出海适配，或判断某种视频打法能否用于其产品时使用。
+description: 默认用中文对视频链接、上传视频或视频素材执行证据驱动的内容与商业拆解。用于 TikTok、YouTube Shorts、Instagram Reels、X/Twitter、Bilibili、抖音、TikTok Shop、Shopee Video、Pinterest 等平台的单视频拆解、多视频对标、账号诊断、脚本或分镜优化、爆款机制分析、复刻评估、平台适配、跨境本地化、视频带货商业决策、单位经济、达人矩阵与素材规模化；覆盖品类视频表达模型（9 大跨境品类）、视频类型分类学（货架/内容/广告/品牌/达人 5 类）、用户决策与内容作用链映射、创意变体矩阵与规模化、内容疲劳类型诊断与刷新策略、7+ 市场文化本地化与法规快筛；当用户要求分析视频的脚本、剪辑、节奏、钩子、内容质量、受众、变现、复刻价值、出海适配，或判断某种视频打法能否用于其产品时使用。
 ---
 
 # 视频链接拆解
@@ -59,11 +59,11 @@ python3 "<skill-dir>/scripts/prepare_video_link.py" "<video-url>" --out "$TASK_D
 
 | 用户目标 | 主场景 | 默认交付 | 必读资源 |
 |---|---|---|---|
-| 拆解一个视频、为什么有效 | 单视频拆解 | Content Teardown | `standard-teardown.md`、`scoring-model.md` |
-| 比较多个视频或竞品 | 竞争对标 | Comparison Memo | `standard-teardown.md`、`scoring-model.md` |
-| 诊断账号 | 账号诊断 | Account Diagnosis | `standard-teardown.md` |
-| 判断能否带货或用于某产品 | 商业决策 | Commerce Decision | `standard-teardown.md`、`commerce-decision.md`、`scoring-model.md` |
-| 改写脚本或分镜 | 脚本优化 | Script Test Card | `standard-teardown.md` |
+| 拆解一个视频、为什么有效 | 单视频拆解 | Content Teardown | `standard-teardown.md`、`scoring-model.md`，按需叠加 `video-type-typology.md`（确定视频类型）和 `category-video-expression.md`（确定品类表达） |
+| 比较多个视频或竞品 | 竞争对标 | Comparison Memo | `standard-teardown.md`、`scoring-model.md`，按需叠加 `video-type-typology.md` 和 `category-video-expression.md` |
+| 诊断账号 | 账号诊断 | Account Diagnosis | `standard-teardown.md`，按需叠加 `video-type-typology.md`（账号内容类型混合时） |
+| 判断能否带货或用于某产品 | 商业决策 | Commerce Decision | `standard-teardown.md`、`commerce-decision.md`、`scoring-model.md`，按需叠加 `category-video-expression.md`（品类表达是否到位） |
+| 改写脚本或分镜 | 脚本优化 | Script Test Card | `standard-teardown.md`，按需叠加 `category-video-expression.md`（品类节拍偏好） |
 | 出海、本地化、合规 | 市场适配 | Localization Memo | `localization-and-compliance.md`，需要内容诊断时叠加 `standard-teardown.md` |
 | 达人矩阵、批量素材、规模化 | 规模系统 | Scale System | `creator-scale-system.md`，需要商业测算时叠加 `commerce-decision.md` |
 | 回写品类投决 | CIDM 对接 | Adjustment Proposal | `cidm-integration.md` 及相关场景资源 |
@@ -72,7 +72,7 @@ python3 "<skill-dir>/scripts/prepare_video_link.py" "<video-url>" --out "$TASK_D
 
 ## 交付层级
 
-### Content Card
+### Decision Card
 
 用于快速判断、简单拆解和局部问题。保留：结论、关键观察、主要失效点或可复用点、风险、下一步测试。
 
@@ -80,7 +80,7 @@ python3 "<skill-dir>/scripts/prepare_video_link.py" "<video-url>" --out "$TASK_D
 
 默认用于单视频拆解、对标、账号诊断、脚本优化和商业判断。根据主场景加载模块，不要求固定十二或十六个标题。
 
-### Full Diligence
+### Investment Diligence
 
 仅在用户明确要求完整报告、商业尽调、多个市场/平台比较或规模化方案时使用。覆盖内容机制、商业门槛、本地化、合规、单位经济、规模系统和证据台账。
 
@@ -113,6 +113,8 @@ python3 "<skill-dir>/scripts/prepare_video_link.py" "<video-url>" --out "$TASK_D
 - 读取 [references/localization-and-compliance.md](references/localization-and-compliance.md)：涉及出海市场、语言文化、本地化成本、产品或广告合规时。
 - 读取 [references/creator-scale-system.md](references/creator-scale-system.md)：涉及达人矩阵、批量素材、预算分配、素材疲劳和规模化生产时。
 - 读取 [references/cidm-integration.md](references/cidm-integration.md)：用户提供 CIDM 报告或明确要求把视频结论回写品类投决时。
+- 读取 [references/category-video-expression.md](references/category-video-expression.md)：需要按品类选择视频表达方式、判断品类表达是否到位、或优化品类专属视频策略时。
+- 读取 [references/video-type-typology.md](references/video-type-typology.md)：需要区分视频类型（货架/内容/广告/品牌/达人）、选择对应评价标准、或调整评分权重时。
 
 ## 输出规则
 
