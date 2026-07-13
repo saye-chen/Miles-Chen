@@ -9,6 +9,6 @@
 | 身份覆盖 | 可解析客户事件/总事件 | 跨渠道价值低估 |
 | 授权覆盖 | 有效授权/候选触达 | 合规与执行风险 |
 
-`NetRevenue = GrossSales - Discount - Cancel - Refund - Tax_excluded`。再扣除 COGS、履约、平台/支付费、退货损失、服务和权益得到贡献利润。无法解释的差异进入数据异常，不让模型吸收。跨币种必须保留原币、汇率、汇率日期和基准币。
+`NetRevenue = CapturedPayment - RecognizedDiscount - CompletedRefund - Tax_excluded`。未捕获支付的取消订单不再次作为退款扣除；退款按完成状态和确认时间入账。再扣除 COGS、履约、平台/支付费、退货损失、服务和权益得到贡献利润。无法解释的差异进入数据异常，不让模型吸收。跨币种必须保留原币、汇率、汇率日期和基准币。
 
 数据门槛不过时，降级为数据审计或描述性分析，不训练预测/因果模型。
