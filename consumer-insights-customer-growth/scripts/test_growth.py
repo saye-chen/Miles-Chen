@@ -31,4 +31,28 @@ class GrowthScripts(unittest.TestCase):
             inp.write_text(json.dumps([{"customer_key":"c1","action":"email","uplift":.1,"contribution_margin":100,"contact_cost":1,"consent":True,"not_unsubscribed":True,"frequency_ok":True,"inventory_ok":True,"market_allowed":True},{"customer_key":"c2","action":"coupon","uplift":.01,"contribution_margin":10,"incentive_cost":5,"consent":True,"not_unsubscribed":True,"frequency_ok":True,"inventory_ok":True,"market_allowed":True}]),encoding="utf-8")
             run("rank_next_best_actions.py","--input",inp,"--output",out); d=json.loads(out.read_text()); self.assertEqual(d["selected"][0]["customer_key"],"c1"); self.assertIn("non_positive_niv",d["not_selected"][0]["rejection_reasons"])
 
+    def test_reconciliation_voc_lifecycle_uplift_and_governance(self):
+        with tempfile.TemporaryDirectory() as td:
+            td=Path(td); out=td/"out.json"
+            ledger=td/"ledger.csv"
+            with ledger.open("w",newline="",encoding="utf-8") as f:
+                fields=["order_id","market","currency","captured_payment","recognized_discount","completed_refund","tax_excluded","cogs","reported_net_revenue"];w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerow({"order_id":"o1","market":"US","currency":"USD","captured_payment":100,"recognized_discount":10,"completed_refund":5,"tax_excluded":5,"cogs":30,"reported_net_revenue":80})
+            run("reconcile_customer_revenue.py","--input",ledger,"--output",out);self.assertTrue(json.loads(out.read_text())["reconciled"])
+            voc=td/"voc.csv"
+            with voc.open("w",newline="",encoding="utf-8") as f:
+                fields=["language","market","label_a","label_b","confidence"];w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows([{"language":"en","market":"US","label_a":"fit","label_b":"fit","confidence":"high"},{"language":"en","market":"US","label_a":"size","label_b":"size","confidence":"high"}])
+            run("audit_voc_labels.py","--input",voc,"--output",out);self.assertEqual(json.loads(out.read_text())["groups"][0]["agreement"],1)
+            states=td/"states.csv"
+            with states.open("w",newline="",encoding="utf-8") as f:
+                fields=["customer_key","snapshot_at","state"];w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows([{"customer_key":"c1","snapshot_at":"2026-01-01","state":"new"},{"customer_key":"c1","snapshot_at":"2026-02-01","state":"active"}])
+            run("analyze_lifecycle_transitions.py","--input",states,"--output",out);self.assertEqual(json.loads(out.read_text())["transitions"][0]["probability"],1)
+            uplift=td/"uplift.csv"
+            with uplift.open("w",newline="",encoding="utf-8") as f:
+                fields=["uplift_score","treatment","outcome"];w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows([{"uplift_score":.9,"treatment":1,"outcome":1},{"uplift_score":.8,"treatment":0,"outcome":0},{"uplift_score":.2,"treatment":1,"outcome":0},{"uplift_score":.1,"treatment":0,"outcome":1}])
+            run("evaluate_uplift_ranking.py","--input",uplift,"--output",out,"--bins",2);self.assertGreater(json.loads(out.read_text())["top_minus_bottom"],0)
+            gov=td/"gov.csv"
+            with gov.open("w",newline="",encoding="utf-8") as f:
+                fields=["prediction","outcome","group","selected","period"];w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows([{"prediction":.2,"outcome":0,"group":"A","selected":0,"period":"baseline"},{"prediction":.4,"outcome":1,"group":"A","selected":1,"period":"current"}])
+            run("evaluate_growth_governance.py","--input",gov,"--output",out);self.assertEqual(json.loads(out.read_text())["n"],2)
+
 if __name__=="__main__": unittest.main()

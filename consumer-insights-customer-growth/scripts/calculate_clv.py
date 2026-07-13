@@ -12,6 +12,12 @@ def main():
     for i,x in enumerate(discounted,1):
         cumulative+=x
         if payback is None and cumulative>=cac: payback=i
-    out={"clv":sum(discounted)-cac-future,"discounted_contribution":discounted,"cac":cac,"payback_period":payback,"type":"scenario_not_individual_prediction"}
+    gross=sum(discounted);net=gross-cac-future
+    intervals={}
+    for label,values in d.get("contribution_margin_scenarios",{}).items():
+        if len(values)!=len(survival): raise SystemExit("scenario margins and survival must have equal length")
+        g=sum(float(m)*float(s)/(1+rate)**(i+1) for i,(m,s) in enumerate(zip(values,survival)))
+        intervals[label]={"gross_customer_value":g,"net_clv":g-cac-future}
+    out={"gross_customer_value":gross,"net_clv":net,"clv":net,"value_basis":"contribution_margin","discounted_contribution":discounted,"cac":cac,"expected_future_cost":future,"payback_period":payback,"scenarios":intervals,"type":"scenario_not_individual_prediction"}
     Path(a.output).write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 if __name__=="__main__": main()

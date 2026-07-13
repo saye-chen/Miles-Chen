@@ -16,11 +16,16 @@ def main():
     parser.add_argument("--input", required=True, help="JSON list of chronological snapshots")
     parser.add_argument("--output", required=True)
     parser.add_argument("--baseline-periods", type=int, default=8)
+    parser.add_argument("--calibration", help="Optional JSON with field thresholds and calibration metadata")
     args = parser.parse_args()
     rows = json.loads(Path(args.input).read_text(encoding="utf-8"))
     if not isinstance(rows, list) or len(rows) < 2:
         raise SystemExit("input must be a JSON list with at least two snapshots")
     current, previous = rows[-1], rows[-2]
+    calibration = {}
+    if args.calibration:
+        calibration = json.loads(Path(args.calibration).read_text(encoding="utf-8"))
+    thresholds = {**DEFAULT_THRESHOLDS, **calibration.get("thresholds", {})}
     alerts = []
     ignored = {"snapshot_at", "product_id", "source", "url"}
     fields = sorted(set().union(*(row.keys() for row in rows)) - ignored)
@@ -37,23 +42,33 @@ def main():
             sigma = statistics.stdev(baseline_values)
             if sigma:
                 zscore = (value - statistics.mean(baseline_values)) / sigma
-        threshold = DEFAULT_THRESHOLDS.get(field)
+        threshold = thresholds.get(field)
         threshold_hit = False
-        if field in {"price", "rank"} and relative is not None:
+        if threshold is not None and field in {"price", "rank"} and relative is not None:
             threshold_hit = abs(relative) >= threshold
-        elif field in {"rating", "sku_count"}:
+        elif threshold is not None and field in {"rating", "sku_count"}:
             threshold_hit = abs(absolute) >= threshold
         z_hit = zscore is not None and abs(zscore) >= 1.96
         if threshold_hit or z_hit:
             severity = "red" if zscore is not None and abs(zscore) >= 3 else "yellow"
+            confirmed = severity == "red"
+            if len(rows) >= 3 and not confirmed:
+                prior = rows[-3].get(field)
+                if isinstance(prior, (int, float)):
+                    previous_change = before - prior
+                    confirmed = previous_change != 0 and absolute != 0 and (previous_change > 0) == (absolute > 0)
             alerts.append({
                 "field": field, "before": before, "after": value,
                 "absolute_change": absolute, "relative_change": relative,
                 "zscore": None if zscore is None or math.isnan(zscore) else zscore,
                 "baseline_mature": len(baseline_values) >= args.baseline_periods,
                 "severity": severity, "attribution": "pending_verification",
+                "confirmation_status": "confirmed" if confirmed else "candidate_waiting_next_snapshot",
             })
-    result = {"product_id": current.get("product_id"), "snapshot_at": current.get("snapshot_at"), "alerts": alerts}
+    result = {
+        "product_id": current.get("product_id"), "snapshot_at": current.get("snapshot_at"),
+        "calibration": calibration.get("metadata", {}), "alerts": alerts,
+    }
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
