@@ -62,8 +62,13 @@ class EvidenceAndSellerTests(unittest.TestCase):
         self.assertIn("推导出的销量、需求强度、竞争结论标为“分析假设”", self.scoring)
 
     def test_default_seller_cannot_set_heavy_actions(self):
-        self.assertIn("不得直接用于确定预算比例、首批数量、多平台扩张或重仓动作", self.seller)
+        self.assertIn("不得直接确定预算比例、首批数量、多平台扩张、重仓动作或低分例外", self.seller)
         self.assertNotRegex(self.seller, r"首批\s*\d+[-–]\d+\s*件")
+
+    def test_unknown_seller_is_agnostic_not_boutique_anchored(self):
+        self.assertIn("seller-agnostic", self.seller)
+        self.assertIn("不得默认精品型", self.seller)
+        self.assertNotIn("默认按**精品型**", self.seller)
 
     def test_store_numbers_are_declared_as_priors(self):
         self.assertIn("研究先验", self.product_line)
@@ -74,7 +79,7 @@ class EvidenceAndSellerTests(unittest.TestCase):
 
 class VersionTests(unittest.TestCase):
     def test_cidm_version_is_consistent(self):
-        expected = "CIDM-2026.10"
+        expected = "CIDM-2026.14"
         files = [
             CIDM / "SKILL.md",
             CIDM / "agents" / "openai.yaml",

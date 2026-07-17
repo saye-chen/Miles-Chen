@@ -21,6 +21,9 @@ FILES = {
     "vlb": ROOT / "video-link-breakdown" / "references" / "content-creative-and-propagation.md",
     "cig": ROOT / "consumer-insights-customer-growth" / "references" / "customer-experience-service-loyalty-reputation.md",
 }
+BOUTIQUE = ROOT / "category-investment-decision" / "references" / "boutique-zero-to-one-operating-system.md"
+SELLER_MODELS = ROOT / "category-investment-decision" / "references" / "seller-operating-models-and-topologies.md"
+REPORT_LINEAGE = ROOT / "category-investment-decision" / "references" / "report-lineage-and-progressive-rebase.md"
 
 
 class UpgradedDomainCoverage(unittest.TestCase):
@@ -36,6 +39,31 @@ class UpgradedDomainCoverage(unittest.TestCase):
             "退出与资金释放", "数据截止时间冲突", "币税/利润口径冲突",
             "全部候选负贡献", "再进入", "停止条件",
         ])
+
+    def test_boutique_zero_to_one_scale_cost_and_redline_depth(self):
+        text = BOUTIQUE.read_text(encoding="utf-8")
+        for term in ["产品先天投资质量卡", "精品组织攻坚卡", "Boutique Venture Test", "G0 投资立项", "G10 修复/退出", "九条并行工作流", "规模—成本桥", "validated cost", "停止条件", "回滚"]:
+            with self.subTest(term=term):
+                self.assertIn(term, text)
+        self.assertIn("不能直接加到 CIDM 七维分数", text)
+        self.assertIn("不能抵消硬红线", text)
+
+    def test_seller_operating_models_cover_asymmetry_playbooks_and_topologies(self):
+        text = SELLER_MODELS.read_text(encoding="utf-8")
+        for term in ["无货源 / 轻资产验证", "铺货 / 数据筛选", "精铺 / 漏斗式升级", "品牌商家 / 资产复利", "供应链型 / 反向定义产品", "竞品流量承接", "跟卖 / 同商品竞争", "多链接 A/B 测试", "多店 / AB 店", "单一国家、多平台布局", "多国家、单平台协同", "多国家、多平台协同", "约束解除合同", "Seller-specific Feasibility"]:
+            with self.subTest(term=term):
+                self.assertIn(term, text)
+        for forbidden_guard in ["不得提供商标滥用", "侵权、假货或商品不一致跟卖", "不提供规避关联和风控步骤"]:
+            self.assertIn(forbidden_guard, text)
+
+    def test_progressive_report_rebase_has_single_current_state_and_depth_accumulation(self):
+        text = REPORT_LINEAGE.read_text(encoding="utf-8")
+        for term in ["Current Effective Decision", "Information Delta Card", "Addendum", "Revision", "Recalculation", "Rebase", "New Decision Object", "Impact Set", "继承、替换与撤销矩阵", "Consolidated Report", "Correction", "Current Decision State"]:
+            with self.subTest(term=term):
+                self.assertIn(term, text)
+        self.assertIn("任何时点只允许一个", text)
+        self.assertIn("连续对话只能提高证据密度", text)
+        self.assertIn("不得让用户自行从多轮消息中拼接", text)
 
     def test_cim_six_signals_proxy_conflict_and_routing(self):
         self.assert_terms("cim", [
@@ -58,9 +86,18 @@ class UpgradedDomainCoverage(unittest.TestCase):
 
 class CrossDomainRedlines(unittest.TestCase):
     def minimal(self, decision_type: str, owner: str) -> dict:
+        versions = {
+            "category-investment-decision": "CIDM-2026.14",
+            "competitive-intelligence-monitoring": "CIM-2026.11",
+            "video-link-breakdown": "VLB-2026.13",
+            "consumer-insights-customer-growth": "CIG-2026.07",
+            "advertising-analysis-measurement-optimization": "D09-2026.03",
+            "logistics-inventory-fulfillment-decision": "D07-2026.03",
+        }
         return {
             "mode": "single", "decision_type": decision_type, "decision_owner": owner,
-            "participating_skills": [owner], "runtime_versions": {owner: "TEST"},
+            "participating_skills": [owner], "runtime_versions": {owner: versions[owner]},
+            "participant_results": {owner: {"status": "contributed"}},
             "professional_core": {
                 "object_boundary": "SKU-US-platform-LC3", "conclusion": "Test only",
                 "evidence_summary": ["E1"], "counterevidence": ["alternative"],
@@ -70,7 +107,13 @@ class CrossDomainRedlines(unittest.TestCase):
             },
             "objects": [{"canonical_id": "o1", "country": "US", "platform": "P",
                          "category": "C", "lifecycle": "LC3"}],
-            "evidence": [], "claims": [], "calculations": [],
+            "evidence": [{"id": "E1", "source_skill": owner, "evidence_type": "authorized_fixture",
+                          "evidence_class": "direct", "source_ref": "fixture:E1", "observed_at": "2026-07-17",
+                          "fingerprint": "fixture-E1"}],
+            "claims": [{"id": "C1", "producer_skill": owner, "claim_domain": decision_type,
+                        "state": "validated", "object_id": "o1", "evidence_ids": ["E1"],
+                        "allowed_uses": ["decision_support"], "forbidden_uses": [], "effective_now": True}],
+            "calculations": [],
             "required_calculation_ids": [], "unresolved_redlines": [], "adjustments": [],
         }
 

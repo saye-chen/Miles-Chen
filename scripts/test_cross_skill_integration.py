@@ -24,6 +24,7 @@ CIM_INTEGRATION = ROOT / "competitive-intelligence-monitoring" / "references" / 
 CIG_SKILL = ROOT / "consumer-insights-customer-growth" / "SKILL.md"
 CIG_INTEGRATION = ROOT / "consumer-insights-customer-growth" / "references" / "skill-integration-protocol.md"
 D09_SKILL = ROOT / "advertising-analysis-measurement-optimization" / "SKILL.md"
+D07_SKILL = ROOT / "logistics-inventory-fulfillment-decision" / "SKILL.md"
 
 
 class CrossSkillFieldMapping(unittest.TestCase):
@@ -80,6 +81,9 @@ class SystemWideProfessionalInvariant(unittest.TestCase):
                 self.assertIn("只允许压缩展示", text)
                 self.assertIn("停止条件", text)
                 self.assertIn("决策影响", text)
+        d07 = D07_SKILL.read_text(encoding="utf-8")
+        for phrase in ("专家级", "压缩展示", "停止条件", "不得替代"):
+            self.assertIn(phrase, d07)
 
     def test_decision_ownership_is_explicit(self):
         expected = {
@@ -88,6 +92,7 @@ class SystemWideProfessionalInvariant(unittest.TestCase):
             VLB_SKILL: "视频观察",
             CIG_SKILL: "授权客户证据",
             D09_SKILL: "广告架构",
+            D07_SKILL: "物流网络",
         }
         for skill_file, phrase in expected.items():
             with self.subTest(skill=skill_file.parent.name):

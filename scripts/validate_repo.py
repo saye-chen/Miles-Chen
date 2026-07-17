@@ -14,6 +14,7 @@ Covers RULES.md section 7 checks:
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -183,6 +184,33 @@ def validate_reference_routing() -> list[str]:
                 )
     return errors
 
+def validate_change_impact_manifest() -> list[str]:
+    errors: list[str] = []
+    path = ROOT / "governance/change-impact-manifest.json"
+    if not path.exists():
+        return ["governance/change-impact-manifest.json is required"]
+    data = json.loads(path.read_text(encoding="utf-8"))
+    required = {"owner", "authoritative_sources", "consumers", "validators", "tests", "evaluations"}
+    for cid, spec in data.get("contracts", {}).items():
+        missing = required - set(spec)
+        if missing:
+            errors.append(f"impact contract {cid}: missing {sorted(missing)}")
+        for key in required - {"owner"}:
+            for target in spec.get(key, []):
+                if not (ROOT / target).exists():
+                    errors.append(f"impact contract {cid}: missing target {target}")
+    return errors
+
+def validate_domain_contract_entrypoints() -> list[str]:
+    errors = []
+    for skill_dir in sorted(path.parent for path in ROOT.glob("*/SKILL.md")):
+        entry = skill_dir / "scripts/validate_decision_contract.py"
+        if not entry.exists():
+            errors.append(f"{skill_dir.name}: missing decision contract validator")
+        elif "validate_decision_contract.py" not in (skill_dir / "SKILL.md").read_text(encoding="utf-8"):
+            errors.append(f"{skill_dir.name}: decision contract validator is not routed")
+    return errors
+
 
 def main() -> int:
     skill_dirs = sorted(path.parent for path in ROOT.glob("*/SKILL.md"))
@@ -209,6 +237,8 @@ def main() -> int:
 
     # Reference routing completeness
     errors.extend(validate_reference_routing())
+    errors.extend(validate_change_impact_manifest())
+    errors.extend(validate_domain_contract_entrypoints())
 
     if errors:
         print("\n".join(f"ERROR: {error}" for error in errors), file=sys.stderr)

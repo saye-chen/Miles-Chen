@@ -1,0 +1,20 @@
+{
+  "price": 39.99,
+  "fixed_costs": 19.2,
+  "unit_costs": 19.2,
+  "commission": 6.0,
+  "advertising": 7.2,
+  "promotion_affiliate": 2.0,
+  "return_reserve": 1.76,
+  "profit_before_ads": 11.03,
+  "net_profit": 3.83,
+  "net_margin_pct": 9.6,
+  "break_even_ad_rate_pct": 27.6,
+  "contribution_margin_per_unit": 11.03,
+  "contribution_margin_pct": 27.6,
+  "batch_fixed_costs": 900.0,
+  "batch_fixed_cost_items": {},
+  "break_even_units": 82,
+  "break_even_revenue": 3279.18,
+  "batch_break_even_status": "viable_under_current_assumptions"
+}

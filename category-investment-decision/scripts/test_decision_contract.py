@@ -16,6 +16,7 @@ from pathlib import Path
 SCRIPT = Path(__file__).with_name("validate_decision_contract.py")
 CIDM = "category-investment-decision"
 VLB = "video-link-breakdown"
+VERSIONS={CIDM:"CIDM-2026.14",VLB:"VLB-2026.09","competitive-intelligence-monitoring":"CIM-2026.10","consumer-insights-customer-growth":"CIG-2026.09","advertising-analysis-measurement-optimization":"D09-2026.07","logistics-inventory-fulfillment-decision":"D07-2026.03"}
 
 
 def valid_payload() -> dict:
@@ -24,7 +25,8 @@ def valid_payload() -> dict:
         "decision_type": "investment",
         "decision_owner": CIDM,
         "participating_skills": [CIDM, VLB],
-        "runtime_versions": {CIDM: "CIDM-2026.10", VLB: "VLB-2026.09"},
+        "runtime_versions": {CIDM: "CIDM-2026.14", VLB: "VLB-2026.09"},
+        "participant_results": {CIDM:{"status":"contributed"},VLB:{"status":"contributed"}},
         "professional_core": {
             "object_boundary": "US Amazon indoor electronic pet fountain, LC-2",
             "conclusion": "Only content testing is authorized before gates pass.",
@@ -130,6 +132,12 @@ class OwnershipAndWriteBackTests(unittest.TestCase):
             "advertising": "advertising-analysis-measurement-optimization",
             "advertising_measurement": "advertising-analysis-measurement-optimization",
             "advertising_scaling": "advertising-analysis-measurement-optimization",
+            "logistics": "logistics-inventory-fulfillment-decision",
+            "inventory": "logistics-inventory-fulfillment-decision",
+            "replenishment": "logistics-inventory-fulfillment-decision",
+            "fulfillment": "logistics-inventory-fulfillment-decision",
+            "reverse_logistics": "logistics-inventory-fulfillment-decision",
+            "logistics_incident": "logistics-inventory-fulfillment-decision",
         }
         for decision_type, owner in cases.items():
             with self.subTest(decision_type=decision_type):
@@ -139,13 +147,25 @@ class OwnershipAndWriteBackTests(unittest.TestCase):
                     "decision_type": decision_type,
                     "decision_owner": owner,
                     "participating_skills": [owner],
-                    "runtime_versions": {owner: "TEST-2026.01"},
-                    "evidence": [], "claims": [], "adjustments": [],
+                    "runtime_versions": {owner: VERSIONS[owner]},
+                    "participant_results": {owner:{"status":"contributed"}},
+                    "evidence": [{"id":"E1","source_skill":owner,"evidence_type":"user_input","source_ref":"fixture","observed_at":"2026-07-17","fingerprint":"fp-owner"}],
+                    "claims": [{"id":"C1","producer_skill":owner,"claim_domain":decision_type,"state":"proposed","object_id":"pet-fountain-us-amazon","evidence_ids":["E1"],"allowed_uses":["fixture"],"forbidden_uses":[],"effective_now":False}], "adjustments": [],
                 })
+                payload["professional_core"]["evidence_summary"]=["E1"]
                 if owner != CIDM:
                     payload["calculations"] = []
                     payload["required_calculation_ids"] = []
                 self.assertEqual(run(payload).returncode, 0, run(payload).stderr)
+
+    def test_empty_evidence_claims_and_fake_version_are_blocked(self):
+        payload=valid_payload();payload["runtime_versions"][VLB]="TEST";payload["evidence"]=[];payload["claims"]=[]
+        stderr=run(payload).stderr
+        for phrase in ["invalid runtime version","evidence must contain","claims must contain"]: self.assertIn(phrase,stderr)
+
+    def test_every_participant_must_report_success_or_failure(self):
+        payload=valid_payload();payload["participating_skills"].append("logistics-inventory-fulfillment-decision");payload["runtime_versions"]["logistics-inventory-fulfillment-decision"]="D07-2026.03"
+        self.assertIn("missing participant results",run(payload).stderr)
 
     def test_wrong_decision_owner_is_blocked(self):
         payload = valid_payload()
@@ -257,8 +277,9 @@ class CalculationAndReferenceTests(unittest.TestCase):
             "decision_type": "loyalty",
             "decision_owner": "consumer-insights-customer-growth",
             "participating_skills": [CIDM, VLB, "consumer-insights-customer-growth"],
-            "runtime_versions": {CIDM: "TEST", VLB: "TEST", "consumer-insights-customer-growth": "TEST"},
-            "claims": [], "adjustments": [], "calculation_required": True,
+            "runtime_versions": {x:VERSIONS[x] for x in [CIDM,VLB,"consumer-insights-customer-growth"]},
+            "participant_results": {x:{"status":"contributed"} for x in [CIDM,VLB,"consumer-insights-customer-growth"]},
+            "adjustments": [], "calculation_required": True,
             "required_calculation_ids": ["profit"],
         })
         self.assertEqual(run(payload).returncode, 0, run(payload).stderr)
@@ -310,6 +331,7 @@ class InvocationTopologyTests(unittest.TestCase):
             "video-link-breakdown",
             "consumer-insights-customer-growth",
             "advertising-analysis-measurement-optimization",
+            "logistics-inventory-fulfillment-decision",
         ]
         owner_to_type = {
             "category-investment-decision": "investment",
@@ -317,9 +339,10 @@ class InvocationTopologyTests(unittest.TestCase):
             "video-link-breakdown": "content",
             "consumer-insights-customer-growth": "customer_growth",
             "advertising-analysis-measurement-optimization": "advertising",
+            "logistics-inventory-fulfillment-decision": "logistics",
         }
         tested = 0
-        for size in range(1, 6):
+        for size in range(1, 7):
             for participants in itertools.combinations(skills, size):
                 payload = valid_payload()
                 owner = participants[0]
@@ -328,12 +351,14 @@ class InvocationTopologyTests(unittest.TestCase):
                     "decision_type": owner_to_type[owner],
                     "decision_owner": owner,
                     "participating_skills": list(participants),
-                    "runtime_versions": {skill: "TEST-2026.01" for skill in participants},
-                    "evidence": [],
-                    "claims": [],
+                    "runtime_versions": {skill: VERSIONS[skill] for skill in participants},
+                    "participant_results": {skill:{"status":"contributed"} for skill in participants},
+                    "evidence": [{"id":f"E{i+1}","source_skill":skill,"evidence_type":"fixture","source_ref":f"source-{i+1}","observed_at":"2026-07-17","fingerprint":f"fp-{i+1}"} for i,skill in enumerate(participants)],
+                    "claims": [{"id":"C1","producer_skill":owner,"claim_domain":owner_to_type[owner],"state":"proposed","object_id":"pet-fountain-us-amazon","evidence_ids":["E1"],"allowed_uses":["topology_test"],"forbidden_uses":[],"effective_now":False}],
                     "adjustments": [],
                     "unresolved_redlines": [],
                 })
+                payload["professional_core"]["evidence_summary"]=[f"E{i+1}" for i in range(len(participants))]
                 if owner == "category-investment-decision":
                     payload["calculations"] = valid_payload()["calculations"]
                     payload["required_calculation_ids"] = ["score", "profit"]
@@ -344,7 +369,7 @@ class InvocationTopologyTests(unittest.TestCase):
                     result = run(payload)
                     self.assertEqual(result.returncode, 0, result.stderr)
                 tested += 1
-        self.assertEqual(tested, 31)
+        self.assertEqual(tested, 63)
 
 
 if __name__ == "__main__":

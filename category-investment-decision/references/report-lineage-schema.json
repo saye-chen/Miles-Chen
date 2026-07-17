@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0",
+  "change_classes": ["Addendum", "Revision", "Recalculation", "Rebase", "New Decision Object", "Correction", "Consolidation"],
+  "report_statuses": ["current", "superseded", "historical", "blocked"],
+  "action_statuses": ["planned", "approved", "committed", "in_progress", "irreversible", "paused", "revoked", "completed", "recovery_required"],
+  "evidence_states": ["confirmed", "partial", "user-asserted", "conflicting", "rejected", "expired"],
+  "required_report_fields": ["report_id", "report_version", "object_id", "parent_report_ids", "runtime_version", "evidence_cutoff", "information_state", "status", "change_class", "impact_set", "transition_matrix", "modules", "actions", "calculations", "depth_metrics"],
+  "required_current_state_fields": ["object_id", "current_report_id", "active_action_ids", "pending_gate_ids", "missing_data", "stop_conditions"]
+}

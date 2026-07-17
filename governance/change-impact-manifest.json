@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0",
+  "runtime_version_policy": {
+    "format": "<SKILL>-YYYY.MM",
+    "patch": "勘误且不改变行为时不升级运行时",
+    "minor": "新增场景、平台、参考协议、脚本或非破坏性行为时升级到发布年月",
+    "major": "评分、决策档位、输出合同或输入结构发生破坏性变化时升级并禁止旧报告直接比较"
+  },
+  "contracts": {
+    "decision-contract-core": {
+      "owner": "repository",
+      "authoritative_sources": ["category-investment-decision/scripts/validate_decision_contract.py", "scripts/validate_decision_contract.py"],
+      "consumers": ["category-investment-decision", "competitive-intelligence-monitoring", "video-link-breakdown", "consumer-insights-customer-growth", "advertising-analysis-measurement-optimization", "logistics-inventory-fulfillment-decision"],
+      "validators": ["scripts/validate_decision_contract.py"],
+      "tests": ["scripts/test_domain_stress.py", "scripts/test_cross_skill_integration.py", "scripts/test_expert_release.py"],
+      "evaluations": ["evaluations/golden-reports", "evaluations/adversarial-cases"]
+    },
+    "cidm-scoring": {
+      "owner": "category-investment-decision",
+      "authoritative_sources": ["category-investment-decision/SKILL.md", "category-investment-decision/references/scoring-model.md"],
+      "consumers": ["category-investment-decision/references/report-template.md", "category-investment-decision/references/capital-portfolio-and-lifecycle.md", "video-link-breakdown/references/cidm-integration.md"],
+      "validators": ["category-investment-decision/scripts/validate_decision_contract.py"],
+      "tests": ["category-investment-decision/scripts/test_models.py", "scripts/test_domain_stress.py"],
+      "evaluations": ["evaluations/golden-reports/cidm-full.md", "evaluations/golden/cidm-single.md"]
+    },
+    "cidm-boutique-zero-to-one": {
+      "owner": "category-investment-decision",
+      "authoritative_sources": ["category-investment-decision/references/boutique-zero-to-one-operating-system.md", "category-investment-decision/references/seller-endowment-matching.md"],
+      "consumers": ["category-investment-decision/SKILL.md", "category-investment-decision/references/post-launch-playbook.md", "category-investment-decision/references/supply-chain.md"],
+      "validators": ["category-investment-decision/scripts/validate_decision_contract.py"],
+      "tests": ["scripts/test_category_semantics.py", "scripts/test_domain_stress.py", "scripts/test_expert_release.py"],
+      "evaluations": ["evaluations/golden-reports/cidm-boutique-full.md", "evaluations/golden-reports/cidm-full.md"]
+    },
+    "cidm-seller-operating-models": {
+      "owner": "category-investment-decision",
+      "authoritative_sources": ["category-investment-decision/references/seller-operating-models-and-topologies.md", "category-investment-decision/references/seller-endowment-matching.md"],
+      "consumers": ["category-investment-decision/SKILL.md", "category-investment-decision/references/portfolio-decision.md", "category-investment-decision/references/platform-playbooks.md"],
+      "validators": ["category-investment-decision/scripts/validate_decision_contract.py"],
+      "tests": ["scripts/test_category_semantics.py", "scripts/test_domain_stress.py", "scripts/test_expert_release.py"],
+      "evaluations": ["evaluations/golden-reports/cidm-seller-topology-full.md"]
+    },
+    "cidm-report-lineage": {
+      "owner": "category-investment-decision",
+      "authoritative_sources": ["category-investment-decision/references/report-lineage-and-progressive-rebase.md", "category-investment-decision/references/report-lineage-schema.json", "category-investment-decision/references/decision-impact-graph.json", "category-investment-decision/SKILL.md"],
+      "consumers": ["category-investment-decision/references/report-template.md", "category-investment-decision/references/report-style-guide.md", "category-investment-decision/references/professional-depth-governance.md", "category-investment-decision/scripts/build_current_decision_state.py"],
+      "validators": ["category-investment-decision/scripts/validate_decision_contract.py", "category-investment-decision/scripts/validate_report_lineage.py", "category-investment-decision/scripts/analyze_report_delta.py"],
+      "tests": ["category-investment-decision/scripts/test_report_lineage.py", "scripts/test_category_semantics.py", "scripts/test_domain_stress.py", "scripts/test_expert_release.py"],
+      "evaluations": ["evaluations/golden-reports/cidm-progressive-rebase-full.md", "evaluations/lineage/cidm-progressive-rebase.json"]
+    },
+    "vlb-creative-experiment": {
+      "owner": "video-link-breakdown",
+      "authoritative_sources": ["video-link-breakdown/references/content-creative-and-propagation.md"],
+      "consumers": ["video-link-breakdown/SKILL.md", "advertising-analysis-measurement-optimization/references/cross-domain-and-output-contract.md"],
+      "validators": ["video-link-breakdown/scripts/validate_decision_contract.py"],
+      "tests": ["scripts/test_domain_stress.py", "scripts/test_expert_release.py"],
+      "evaluations": ["evaluations/golden/vlb-single.md", "evaluations/adversarial-cases/keyword-stuffed.md"]
+    },
+    "d09-runtime": {
+      "owner": "advertising-analysis-measurement-optimization",
+      "authoritative_sources": ["advertising-analysis-measurement-optimization/SKILL.md"],
+      "consumers": ["advertising-analysis-measurement-optimization/agents/openai.yaml", "advertising-analysis-measurement-optimization/references/professional-report-delivery.md", "README.md"],
+      "validators": ["advertising-analysis-measurement-optimization/scripts/validate_decision_contract.py"],
+      "tests": ["advertising-analysis-measurement-optimization/scripts/test_models.py", "scripts/test_advertising_stress.py", "scripts/test_cross_skill_integration.py"],
+      "evaluations": ["evaluations/golden/d09-single.md"]
+    },
+    "d07-runtime": {
+      "owner": "logistics-inventory-fulfillment-decision",
+      "authoritative_sources": ["logistics-inventory-fulfillment-decision/SKILL.md", "logistics-inventory-fulfillment-decision/references/decision-contracts-and-output.md"],
+      "consumers": ["logistics-inventory-fulfillment-decision/agents/openai.yaml", "README.md", "RULES.md"],
+      "validators": ["logistics-inventory-fulfillment-decision/scripts/validate_decision_contract.py", "scripts/validate_repo.py"],
+      "tests": ["logistics-inventory-fulfillment-decision/scripts/test_models.py"],
+      "evaluations": ["logistics-inventory-fulfillment-decision/references/expert-scenarios.json", "evaluations/golden/d07-single.md", "evaluations/golden-reports/d07-full.md"]
+    }
+  }
+}

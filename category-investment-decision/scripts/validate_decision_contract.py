@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -33,11 +34,22 @@ OWNERS = {
     "advertising": "advertising-analysis-measurement-optimization",
     "advertising_measurement": "advertising-analysis-measurement-optimization",
     "advertising_scaling": "advertising-analysis-measurement-optimization",
+    "logistics": "logistics-inventory-fulfillment-decision",
+    "inventory": "logistics-inventory-fulfillment-decision",
+    "replenishment": "logistics-inventory-fulfillment-decision",
+    "fulfillment": "logistics-inventory-fulfillment-decision",
+    "reverse_logistics": "logistics-inventory-fulfillment-decision",
+    "logistics_incident": "logistics-inventory-fulfillment-decision",
 }
 SKILLS = set(OWNERS.values())
-CLAIM_STATES = {"observed", "estimated", "hypothesis", "proposed", "validated", "rejected"}
+CLAIM_STATES = {"observed", "estimated", "hypothesis", "proposed", "validated", "rejected", "blocked", "inconclusive", "superseded"}
 ADJUSTMENT_STATES = {"proposed", "validated", "rejected"}
 CONFIDENCE_RANK = {"low": 0, "medium": 1, "high": 2}
+VERSION_PREFIX = {
+    "category-investment-decision":"CIDM", "competitive-intelligence-monitoring":"CIM",
+    "video-link-breakdown":"VLB", "consumer-insights-customer-growth":"CIG",
+    "advertising-analysis-measurement-optimization":"D09", "logistics-inventory-fulfillment-decision":"D07",
+}
 PROFESSIONAL_FIELDS = (
     "object_boundary",
     "conclusion",
@@ -98,6 +110,19 @@ def validate(payload: dict) -> list[str]:
         missing_versions = sorted(set(participants) - set(payload["runtime_versions"]))
         if missing_versions:
             errors.append(f"missing runtime versions for: {missing_versions}")
+        for skill in participants:
+            version=str(payload["runtime_versions"].get(skill,""));prefix=VERSION_PREFIX.get(skill,"")
+            if not re.fullmatch(rf"{re.escape(prefix)}-20\d{{2}}\.\d{{2}}",version): errors.append(f"invalid runtime version for {skill}: {version!r}")
+
+    results=payload.get("participant_results")
+    if not isinstance(results,dict): errors.append("participant_results must be an object covering every participating skill");results={}
+    else:
+        missing=sorted(set(participants)-set(results));extra=sorted(set(results)-set(participants))
+        if missing: errors.append(f"missing participant results for: {missing}")
+        if extra: errors.append(f"participant results include non-participants: {extra}")
+        for skill,result in results.items():
+            if not isinstance(result,dict) or result.get("status") not in {"contributed","blocked","inconclusive","not_required"}: errors.append(f"participant result {skill} has invalid status")
+            elif result.get("status")!="contributed" and not nonempty(result.get("reason")): errors.append(f"participant result {skill} requires failure or exclusion reason")
 
     professional = payload.get("professional_core")
     if not isinstance(professional, dict):
@@ -126,6 +151,7 @@ def validate(payload: dict) -> list[str]:
     if not isinstance(evidence, list):
         errors.append("evidence must be a list")
         evidence = []
+    elif not evidence: errors.append("evidence must contain at least one traceable item")
     evidence_by_id: dict[str, dict] = {}
     for index, item in enumerate(evidence):
         if not isinstance(item, dict):
@@ -148,6 +174,7 @@ def validate(payload: dict) -> list[str]:
     if not isinstance(claims, list):
         errors.append("claims must be a list")
         claims = []
+    elif not claims: errors.append("claims must contain at least one owned claim")
     claim_ids: set[str] = set()
     claim_dependencies: dict[str, list[str]] = {}
     for index, claim in enumerate(claims):
@@ -231,6 +258,12 @@ def validate(payload: dict) -> list[str]:
 
     for claim_id in claim_dependencies:
         visit(claim_id)
+
+    summary_ids=set()
+    if isinstance(professional,dict):
+        summary_ids=set(re.findall(r"(?<![A-Z0-9])E\d+(?!\d)",json.dumps(professional.get("evidence_summary",[]),ensure_ascii=False)))
+    missing_summary=sorted(summary_ids-set(evidence_by_id))
+    if missing_summary: errors.append(f"professional evidence summary references unknown evidence: {missing_summary}")
 
     unresolved_redlines = payload.get("unresolved_redlines", [])
     if not isinstance(unresolved_redlines, list):

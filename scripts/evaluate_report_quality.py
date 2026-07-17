@@ -31,8 +31,43 @@ REDLINES = {
 
 REQUIRED_HEADINGS = ["执行摘要", "对象与边界", "证据与反证", "经济与计算", "根因", "主权与联动", "行动计划", "国家/平台与动态事实", "自检摘要"]
 
+FULL_REQUIRED_HEADINGS = REQUIRED_HEADINGS + ["门槛与评分", "证据台账", "假设台账", "计算台账", "决策推导"]
+PLACEHOLDER_PATTERNS = [r"待补充", r"\bTBD\b", r"\bTODO\b", r"示例内容", r"这里填写", r"^\s*略\s*$", r"[（\[]略[）\]]"]
 
-def score_report(text: str) -> dict:
+def section(text: str, heading: str) -> str:
+    match = re.search(rf"^#+\s+{re.escape(heading)}\s*$([\s\S]*?)(?=^#+\s+|\Z)", text, re.M)
+    return match.group(1).strip() if match else ""
+
+def semantic_checks(text: str, profile: str) -> list[str]:
+    errors = []
+    for heading in REQUIRED_HEADINGS:
+        body = section(text, heading)
+        if len(re.sub(r"[`#|*\s]", "", body)) < 20:
+            errors.append(f"shallow_section:{heading}")
+    ids = {kind: set(re.findall(rf"(?<![A-Z0-9]){kind}(\d+)(?!\d)", text)) for kind in "EAC"}
+    if any(not values for values in ids.values()):
+        errors.append("missing_ledger_ids")
+    if re.search("|".join(PLACEHOLDER_PATTERNS), text, re.I):
+        errors.append("placeholder_content")
+    if "可复算：是" in text and not ("输入哈希" in text and "输出哈希" in text and re.search(r"计算器|\.py", text)):
+        errors.append("unsupported_reproducibility_claim")
+    if re.search(r"决策结论[^\n]{0,40}(Scale|重仓|立即放量)", text, re.I) and re.search(r"(边际贡献|贡献利润)[^\n]{0,30}(为负|<\s*0|负数)", text):
+        errors.append("scale_conflicts_with_negative_economics")
+    if re.search(r"(代理信号|proxy)[^\n]{0,40}(已确认事实|observed fact)", text, re.I):
+        errors.append("proxy_promoted_to_fact")
+    if profile == "full":
+        if len(text.splitlines()) < 50 or len(text) < 1200:
+            errors.append("full_report_too_short")
+        for heading in FULL_REQUIRED_HEADINGS:
+            if not section(text, heading):
+                errors.append(f"missing_full_section:{heading}")
+        for term in ["支持证据", "反对证据", "最弱假设", "成功条件", "停止条件", "回滚", "置信度", "决策影响"]:
+            if term not in text:
+                errors.append(f"missing_full_semantic:{term}")
+    return errors
+
+
+def score_report(text: str, profile: str = "fixture") -> dict:
     dimensions = {}
     for name, (weight, required) in DIMENSIONS.items():
         present = [item for item in required if item in text]
@@ -46,16 +81,18 @@ def score_report(text: str) -> dict:
     critical = ["evidence_traceability", "economics_calculation", "decision_sovereignty", "actionability", "stop_and_rollback"]
     critical_ok = all(dimensions[name]["score"] >= dimensions[name]["max"] * .8 for name in critical)
     refs_ok = bool(re.search(r"E\d+", text) and re.search(r"A\d+", text) and re.search(r"C\d+", text))
-    result = "PASS" if total >= 85 and critical_ok and refs_ok and not redlines else "FAIL"
-    return {"result": result, "score": total, "dimensions": dimensions, "redlines": redlines, "missing_required_sections": missing_headings, "ledger_refs_ok": refs_ok}
+    semantic_errors = semantic_checks(text, profile)
+    result = "PASS" if total >= 85 and critical_ok and refs_ok and not redlines and not semantic_errors else "FAIL"
+    return {"result": result, "profile": profile, "score": total, "dimensions": dimensions, "redlines": redlines, "semantic_errors": semantic_errors, "missing_required_sections": missing_headings, "ledger_refs_ok": refs_ok}
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--profile", choices=["fixture", "contract", "full"], default="contract")
     args = parser.parse_args()
-    result = score_report(args.input.read_text(encoding="utf-8"))
+    result = score_report(args.input.read_text(encoding="utf-8"), args.profile)
     payload = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.write_text(payload, encoding="utf-8")

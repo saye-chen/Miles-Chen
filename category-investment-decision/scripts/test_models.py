@@ -68,6 +68,23 @@ class ProfitModelTests(unittest.TestCase):
         self.assertEqual(data["batch_break_even_status"], "not_viable_under_current_assumptions")
 
 
+class ScoreEngineTests(unittest.TestCase):
+    def test_weighting_caps_and_redline_are_deterministic(self):
+        payload = {"scores": {key: 8 for key in (
+            "market_demand", "competitive_entry", "profit_space", "content_communication",
+            "supply_control", "risk_control", "opportunity_window")},
+            "sensitivity_caps": {"profit_space": 6}, "hard_redlines": ["regulatory_block"]}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "score.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            result = run_script("score_engine.py", path)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertEqual(data["weighted_score"], 76.0)
+        self.assertEqual(data["decision_status"], "Blocked")
+        self.assertEqual(data["weight_total"], 100)
+
+
 class ReverseFunnelTests(unittest.TestCase):
     @staticmethod
     def payload(**overrides):

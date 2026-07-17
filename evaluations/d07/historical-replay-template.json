@@ -1,0 +1,5 @@
+{
+  "minimum_authorized_cases": 3,
+  "cases": [],
+  "note": "只允许填入经授权、已脱敏且具有实际结果的历史案例。空模板必须判定 production_ready=false；不得用Golden Case或合成案例冒充真实回放。"
+}

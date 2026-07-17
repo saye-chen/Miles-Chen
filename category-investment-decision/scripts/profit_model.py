@@ -9,7 +9,8 @@ from pathlib import Path
 
 def parser():
     p = argparse.ArgumentParser(description="Calculate per-unit profit, break-even ad rate, and optional batch break-even.")
-    p.add_argument("--price", type=float, required=True)
+    p.add_argument("--input-json", type=Path, help="JSON object containing the same inputs as the command line.")
+    p.add_argument("--price", type=float)
     for name in ("product", "packaging", "duty", "inbound", "fulfillment", "storage", "quality", "payment", "other"):
         p.add_argument(f"--{name}", type=float, default=0.0)
     for name in ("commission_rate", "ad_rate", "promo_rate", "return_rate", "return_loss_rate"):
@@ -55,6 +56,21 @@ def load_batch_fixed_costs(path):
 
 def main():
     a = parser().parse_args()
+    if a.input_json:
+        try:
+            payload = json.loads(a.input_json.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise SystemExit(f"invalid input JSON: {exc}") from exc
+        if not isinstance(payload, dict):
+            raise SystemExit("input JSON must be an object")
+        allowed = set(vars(a)) - {"input_json", "batch_fixed_costs_json"}
+        unknown = set(payload) - allowed
+        if unknown:
+            raise SystemExit(f"unknown input JSON fields: {sorted(unknown)}")
+        for key, value in payload.items():
+            setattr(a, key, value)
+    if a.price is None:
+        raise SystemExit("price is required")
     if a.price <= 0:
         raise SystemExit("price must be greater than zero")
     rates = (a.commission_rate, a.ad_rate, a.promo_rate, a.return_rate, a.return_loss_rate)

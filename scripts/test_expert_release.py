@@ -13,6 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 GOLDEN = ROOT / "evaluations" / "golden"
 CROSS_GOLDEN = ROOT / "evaluations" / "cross-skill"
+FULL_GOLDEN = ROOT / "evaluations" / "golden-reports"
+ADVERSARIAL = ROOT / "evaluations" / "adversarial-cases"
 SCENARIOS = json.loads((ROOT / "evaluations" / "cross-skill-scenarios.json").read_text(encoding="utf-8"))["scenarios"]
 spec = importlib.util.spec_from_file_location("report_eval", ROOT / "scripts" / "evaluate_report_quality.py")
 report_eval = importlib.util.module_from_spec(spec); assert spec and spec.loader; spec.loader.exec_module(report_eval)
@@ -23,6 +25,7 @@ SKILLS = {
     "video-link-breakdown": ROOT / "video-link-breakdown" / "SKILL.md",
     "consumer-insights-customer-growth": ROOT / "consumer-insights-customer-growth" / "SKILL.md",
     "advertising-analysis-measurement-optimization": ROOT / "advertising-analysis-measurement-optimization" / "SKILL.md",
+    "logistics-inventory-fulfillment-decision": ROOT / "logistics-inventory-fulfillment-decision" / "SKILL.md",
 }
 
 
@@ -39,14 +42,34 @@ def run_json(script: Path, payload: object, expect_ok: bool = True) -> subproces
 
 
 class GoldenReportGate(unittest.TestCase):
-    def test_all_five_single_skill_golden_reports_pass(self):
+    def test_all_six_single_skill_golden_reports_pass(self):
         files = sorted(GOLDEN.glob("*.md"))
-        self.assertEqual(len(files), 5)
+        self.assertEqual(len(files), 6)
         for file in files:
             with self.subTest(report=file.name):
-                result = report_eval.score_report(file.read_text(encoding="utf-8"))
+                result = report_eval.score_report(file.read_text(encoding="utf-8"), "contract")
                 self.assertEqual(result["result"], "PASS")
                 self.assertGreaterEqual(result["score"], 85)
+
+    def test_full_golden_reports_pass_semantic_depth_gate(self):
+        files = sorted(FULL_GOLDEN.glob("*.md"))
+        self.assertGreaterEqual(len(files), 2)
+        for file in files:
+            with self.subTest(report=file.name):
+                result = report_eval.score_report(file.read_text(encoding="utf-8"), "full")
+                self.assertEqual(result["result"], "PASS", result)
+
+    def test_keyword_stuffing_and_fake_reproducibility_fail(self):
+        for file in ADVERSARIAL.glob("*.md"):
+            with self.subTest(report=file.name):
+                result = report_eval.score_report(file.read_text(encoding="utf-8"), "contract")
+                self.assertEqual(result["result"], "FAIL", result)
+
+    def test_progressive_lineage_golden_passes_deterministic_validator(self):
+        script = ROOT / "category-investment-decision/scripts/validate_report_lineage.py"
+        bundle = ROOT / "evaluations/lineage/cidm-progressive-rebase.json"
+        result = subprocess.run(["python3", str(script), str(bundle)], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_removing_each_critical_module_fails_or_lowers_below_gate(self):
         text = (GOLDEN / "d09-single.md").read_text(encoding="utf-8")
@@ -62,7 +85,7 @@ class GoldenReportGate(unittest.TestCase):
         injections = ["伪造事实：是", "主权越界：是", "因果越界：是", "隐私违规：是", "可复算：否", "未解决红线：是，立即放量 Scale"]
         for injection in injections:
             with self.subTest(redline=injection):
-                self.assertEqual(report_eval.score_report(base + "\n" + injection)["result"], "FAIL")
+                self.assertEqual(report_eval.score_report(base + "\n" + injection, "fixture")["result"], "FAIL")
 
 
 class CrossSkillScenarioGate(unittest.TestCase):
@@ -71,7 +94,7 @@ class CrossSkillScenarioGate(unittest.TestCase):
         self.assertEqual(len(files), 10)
         for file in files:
             with self.subTest(report=file.name):
-                self.assertEqual(report_eval.score_report(file.read_text(encoding="utf-8"))["result"], "PASS")
+                self.assertEqual(report_eval.score_report(file.read_text(encoding="utf-8"), "contract")["result"], "PASS")
 
     def test_ten_complex_scenarios_are_unique_and_complete(self):
         self.assertEqual(len(SCENARIOS), 10)
@@ -88,6 +111,13 @@ class CrossSkillScenarioGate(unittest.TestCase):
     def test_each_scenario_has_one_primary_and_no_primary_in_participants(self):
         for scenario in SCENARIOS:
             self.assertNotIn(scenario["primary"], scenario["participants"], scenario["id"])
+
+    def test_all_six_skills_are_exercised_and_inventory_conflict_routes_d07(self):
+        exercised = {s["primary"] for s in SCENARIOS}
+        exercised |= {p for s in SCENARIOS for p in s["participants"]}
+        self.assertEqual(exercised, set(SKILLS))
+        inventory_case = next(s for s in SCENARIOS if s["id"] == "XS-06")
+        self.assertIn("logistics-inventory-fulfillment-decision", inventory_case["participants"])
 
     def test_partial_failure_and_conflict_scenarios_exist(self):
         self.assertTrue(any("failed" in scenario for scenario in SCENARIOS))

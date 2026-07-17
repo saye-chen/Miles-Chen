@@ -20,11 +20,19 @@ jobs:
         run: |
           python3 category-investment-decision/scripts/test_models.py
           python3 category-investment-decision/scripts/test_decision_contract.py
+          python3 category-investment-decision/scripts/test_report_lineage.py
           python3 video-link-breakdown/scripts/test_prepare_video_link.py
           python3 video-link-breakdown/scripts/test_vlb_frameworks.py
           python3 competitive-intelligence-monitoring/scripts/test_monitoring.py
           python3 consumer-insights-customer-growth/scripts/test_growth.py
           python3 advertising-analysis-measurement-optimization/scripts/test_models.py
+          python3 logistics-inventory-fulfillment-decision/scripts/test_models.py
+          python3 logistics-inventory-fulfillment-decision/scripts/test_executable_fixtures.py
+          python3 logistics-inventory-fulfillment-decision/scripts/test_decision_state.py
+          python3 logistics-inventory-fulfillment-decision/scripts/test_cross_skill_complex.py
+          python3 logistics-inventory-fulfillment-decision/scripts/test_multiturn_report.py
+          python3 logistics-inventory-fulfillment-decision/scripts/test_historical_replay.py
+          python3 scripts/test_logistics_stress.py
       - name: Cross-domain and expert release tests
         run: |
           python3 scripts/test_category_semantics.py
@@ -32,6 +40,7 @@ jobs:
           python3 scripts/test_domain_stress.py
           python3 scripts/test_advertising_stress.py
           python3 scripts/test_expert_release.py
+          python3 scripts/test_governance.py
           python3 scripts/validate_repo.py
       - name: Reject whitespace errors
         run: git diff --check

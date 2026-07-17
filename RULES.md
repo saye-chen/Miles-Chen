@@ -30,6 +30,8 @@ Skill frontmatter must contain only `name` and `description`, as required by the
 
 When bumping a major version, note the change in the commit message. Old report scores from different model versions must not be directly compared unless recalculated.
 
+Before changing a scoring model, output contract, validator, cross-domain rule, runtime version or professional protocol, run `python3 scripts/analyze_change_impact.py <changed-paths>`. The machine-readable source of truth is `governance/change-impact-manifest.json`; every contract must map its owner, sources, consumers, validators, tests and evaluations. Unmapped contract changes block release until the manifest is updated.
+
 ## 3. Source File Safety
 
 - Treat user-provided files as read-only. Do not overwrite, rename, move, delete, or modify their metadata.
@@ -89,6 +91,9 @@ ln -sfn "$PWD/consumer-insights-customer-growth" \
 
 ln -sfn "$PWD/advertising-analysis-measurement-optimization" \
   "${CODEX_HOME:-$HOME/.codex}/skills/advertising-analysis-measurement-optimization"
+
+ln -sfn "$PWD/logistics-inventory-fulfillment-decision" \
+  "${CODEX_HOME:-$HOME/.codex}/skills/logistics-inventory-fulfillment-decision"
 ```
 
 Do not use `cp -r` as an update mechanism; existing destinations can retain stale files or produce nested directories.
@@ -108,6 +113,9 @@ done
 [ -f category-investment-decision/scripts/test_models.py ] && \
   python3 category-investment-decision/scripts/test_models.py
 
+[ -f category-investment-decision/scripts/test_report_lineage.py ] && \
+  python3 category-investment-decision/scripts/test_report_lineage.py
+
 [ -f video-link-breakdown/scripts/test_prepare_video_link.py ] && \
   python3 video-link-breakdown/scripts/test_prepare_video_link.py
 
@@ -120,11 +128,26 @@ done
 [ -f advertising-analysis-measurement-optimization/scripts/test_models.py ] && \
   python3 advertising-analysis-measurement-optimization/scripts/test_models.py
 
+[ -f logistics-inventory-fulfillment-decision/scripts/test_models.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_models.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_executable_fixtures.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_executable_fixtures.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_decision_state.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_decision_state.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_cross_skill_complex.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_cross_skill_complex.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_multiturn_report.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_multiturn_report.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_historical_replay.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_historical_replay.py
+
 python3 scripts/test_cross_skill_integration.py
 
 python3 scripts/test_domain_stress.py
 
 python3 scripts/test_advertising_stress.py
+
+python3 scripts/test_logistics_stress.py
 
 python3 scripts/test_expert_release.py
 
@@ -200,6 +223,8 @@ Rules: integration is opt-in, never auto-triggered; video analysis conclusions t
 
 **advertising-analysis-measurement-optimization ↔ consumer-insights-customer-growth (optional, user-confirmed).** CIG supplies authorized customer value, lifecycle and credible incrementality evidence; D09 supplies exposure, cost and platform-attributed outcomes. D09 does not execute customer contact, and platform attribution cannot replace CIG's causal standard.
 
+**logistics-inventory-fulfillment-decision ↔ all business-domain Skills (optional, user-confirmed).** D07 owns logistics networks, routes, replenishment, inventory allocation, fulfillment capacity, reverse logistics, incidents, and overseas-inventory disposition. It accepts supply constraints from D04, compliance gates from D05, cash/profit constraints from D06, channel plans from D08, demand scenarios from D09/D12, and returns/experience evidence from D13; it returns structured `proposed` capacity, inventory, route, recovery, and stop signals. It never changes capital, procurement, legal, price, advertising, listing, promotion, or customer-action conclusions directly.
+
 ### Rules for new cross-skill references
 
 - The integrating Skill must contain the reference in its own `SKILL.md`; the referenced Skill does not need to know about its caller.
@@ -224,7 +249,7 @@ Rules: integration is opt-in, never auto-triggered; video analysis conclusions t
 
 所有 Skill 在单独调用、任意联合调用、快速交付、完整报告、demo、压测、缺数据、工具失败和极端场景下，都必须保持本域专业研究和决策可用性。压缩只作用于展示，不作用于研究；降级只作用于结论强度，不得删除对象边界、证据与假设、反例、商业约束、风险、动作、成功/停止条件和缺失数据影响。
 
-决策主权固定为：CIDM 拥有品类投资、资本配置和最终 Go/No-Go 主权；CIM 拥有外部竞争事实、变化确认与竞争归因主权；VLB 拥有视频观察、内容机制与迁移性主权；CIG 拥有授权客户证据、客户状态与增量有效性主权；D09 拥有广告架构、广告内部预算/出价、广告诊断/测量和放量/停投主权。非主权 Skill 只能提交结构化建议，不得直接改变主权 Skill 的正式结论、评分、门槛或历史报告。
+决策主权固定为：CIDM 拥有品类投资、资本配置和最终 Go/No-Go 主权；CIM 拥有外部竞争事实、变化确认与竞争归因主权；VLB 拥有视频观察、内容机制与迁移性主权；CIG 拥有授权客户证据、客户状态与增量有效性主权；D09 拥有广告架构、广告内部预算/出价、广告诊断/测量和放量/停投主权；D07 拥有物流网络、路线、补货、库存配置、履约能力、逆向、异常恢复和海外库存处置主权。非主权 Skill 只能提交结构化建议，不得直接改变主权 Skill 的正式结论、评分、门槛或历史报告。
 
 所有会改变投资结论的计算使用确定性脚本；跨 Skill 调整使用 `proposed → validated/rejected` 状态，只有主权 Skill 接受并按原模型重算后才能生效。任何跨档位变化必须有两个独立证据指纹、目标对象直接证据、完整计算、无未解决红线和主权 Skill重算。违反任一条件即阻断交付，不允许用自然语言免责声明绕过。
 
@@ -255,6 +280,8 @@ Skill 前置元数据必须按 Codex Skill 格式只包含 `name` 和 `descripti
 - **主版本**（1.0.0 → 2.0.0）：评分模型、决策档位、输出结构或输入格式的破坏性变更，导致旧报告分数不可直接比较。
 
 主版本升级时需在 commit message 中注明变更。不同模型版本的报告分数不可直接对比，除非按同一版本重算。
+
+修改评分模型、输出合同、校验器、跨域规则、运行时版本或专业协议前，运行 `python3 scripts/analyze_change_impact.py <变更路径>`。机器可读的唯一来源为 `governance/change-impact-manifest.json`；每个合同必须映射 owner、权威来源、消费者、校验器、测试和评估。合同类变更未映射时阻断发布，先更新影响清单。
 
 ## 3. 源文件安全
 
@@ -315,6 +342,9 @@ ln -sfn "$PWD/consumer-insights-customer-growth" \
 
 ln -sfn "$PWD/advertising-analysis-measurement-optimization" \
   "${CODEX_HOME:-$HOME/.codex}/skills/advertising-analysis-measurement-optimization"
+
+ln -sfn "$PWD/logistics-inventory-fulfillment-decision" \
+  "${CODEX_HOME:-$HOME/.codex}/skills/logistics-inventory-fulfillment-decision"
 ```
 
 不要使用 `cp -r` 更新 Skill；目标已存在时可能保留旧文件或产生嵌套目录。
@@ -337,6 +367,9 @@ done
 [ -f category-investment-decision/scripts/test_decision_contract.py ] && \
   python3 category-investment-decision/scripts/test_decision_contract.py
 
+[ -f category-investment-decision/scripts/test_report_lineage.py ] && \
+  python3 category-investment-decision/scripts/test_report_lineage.py
+
 [ -f video-link-breakdown/scripts/test_prepare_video_link.py ] && \
   python3 video-link-breakdown/scripts/test_prepare_video_link.py
 
@@ -349,11 +382,27 @@ done
 [ -f advertising-analysis-measurement-optimization/scripts/test_models.py ] && \
   python3 advertising-analysis-measurement-optimization/scripts/test_models.py
 
+[ -f logistics-inventory-fulfillment-decision/scripts/test_models.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_models.py
+
+[ -f logistics-inventory-fulfillment-decision/scripts/test_executable_fixtures.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_executable_fixtures.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_decision_state.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_decision_state.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_cross_skill_complex.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_cross_skill_complex.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_multiturn_report.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_multiturn_report.py
+[ -f logistics-inventory-fulfillment-decision/scripts/test_historical_replay.py ] && \
+  python3 logistics-inventory-fulfillment-decision/scripts/test_historical_replay.py
+
 python3 scripts/test_cross_skill_integration.py
 
 python3 scripts/test_domain_stress.py
 
 python3 scripts/test_advertising_stress.py
+
+python3 scripts/test_logistics_stress.py
 
 python3 scripts/test_expert_release.py
 
@@ -428,6 +477,8 @@ git push origin main
 **advertising-analysis-measurement-optimization ↔ video-link-breakdown（可选、用户确认）。** VLB 提供内容机制、迁移性和创意测试变体；D09 负责付费交付、广告内部预算与放量。付费效果不能证明内容机制，视频高分也不自动授权预算。
 
 **advertising-analysis-measurement-optimization ↔ consumer-insights-customer-growth（可选、用户确认）。** CIG 提供授权客户价值、生命周期和可信增量证据；D09 提供曝光、成本和平台归因结果。D09 不执行客户触达，平台归因不能替代 CIG 的因果标准。
+
+**logistics-inventory-fulfillment-decision ↔ 所有业务主域 Skill（可选、用户确认）。** D07 拥有物流网络、路线、补货、库存配置、履约能力、逆向、异常和海外库存处置主权；接收 D04 供应约束、D05 合规门、D06 现金利润边界、D08 渠道计划、D09/D12 需求情景和 D13 退货体验证据，并只回传结构化 `proposed` 容量、库存、路线、回收和停止信号。D07 不直接改变资本、采购、法律、价格、广告、Listing、促销或客户动作结论。
 
 ### 新增跨 Skill 引用的规则
 
