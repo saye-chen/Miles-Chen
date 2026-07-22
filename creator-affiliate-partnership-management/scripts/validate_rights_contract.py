@@ -20,7 +20,7 @@ def parse_time(value: str, name: str) -> datetime:
 
 
 def validate(data: dict) -> dict:
-    required = ("rights_id", "content_id", "creator_id", "start_at", "end_at", "granted", "requested", "evidence_ids")
+    required = ("rights_id", "rights_version", "content_id", "content_version", "creator_id", "start_at", "end_at", "granted", "requested", "evidence_ids")
     missing = [k for k in required if k not in data]
     if missing:
         raise ValueError(f"missing fields: {missing}")
@@ -38,12 +38,14 @@ def validate(data: dict) -> dict:
     if not start <= as_of < end:
         blocked.append("outside_valid_period")
     granted, requested = data["granted"], data["requested"]
+    requested_content_version=data.get("requested_content_version",data["content_version"])
+    if requested_content_version != data["content_version"]: blocked.append("stale_rights_content_version")
     for dim in DIMENSIONS:
         allowed = set(granted.get(dim, []))
         wanted = set(requested.get(dim, []))
         if not wanted.issubset(allowed):
             blocked.append(f"ungranted:{dim}:{sorted(wanted - allowed)}")
-    return {"rights_id": data["rights_id"], "status": "blocked" if blocked else "validated",
+    return {"rights_id": data["rights_id"], "rights_version":data["rights_version"], "content_version":data["content_version"], "status": "blocked" if blocked else "validated",
             "blocked_reasons": blocked, "blocked_actions": data.get("requested_actions", []) if blocked else [],
             "allowed_actions": [] if blocked else data.get("requested_actions", []), "input_hash": sha256_json(data)}
 

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "as_of_time": "2026-07-22T00:00:00+08:00",
+  "policy": {
+    "authoritative_standard": "governance/required-skill-governance.md",
+    "l4_minimum_authorized_cases": 3,
+    "default_without_l4_evidence": "controlled pilot",
+    "production_claim_source": "computed_by_validator_only"
+  },
+  "domains": [
+    {"skill":"category-investment-decision","runtime":"CIDM-2026.14","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"category-investment-decision/evaluations/historical-replay.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"competitive-intelligence-monitoring","runtime":"CIM-2026.10","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"competitive-intelligence-monitoring/evaluations/historical-replay.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"video-link-breakdown","runtime":"VLB-2026.10","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"video-link-breakdown/evaluations/historical-replay.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"consumer-insights-customer-growth","runtime":"CIG-2026.09","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"consumer-insights-customer-growth/evaluations/historical-replay.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"advertising-analysis-measurement-optimization","runtime":"AAMO-2026.08","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"advertising-analysis-measurement-optimization/evaluations/historical-replay.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"logistics-inventory-fulfillment-decision","runtime":"LIFD-2026.04","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"evaluations/d07/historical-replay-template.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"platform-store-listing-conversion","runtime":"PLCO-2026.08","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"evaluations/d08/historical-replay-template.json","blocking_reason":"No authorized mature historical replays are registered."},
+    {"skill":"creator-affiliate-partnership-management","runtime":"CAPM-2026.07","l1":"passed","l2":"passed","l3":"passed_automated_gate","l4":"not_passed","maturity":"controlled pilot","authorized_real_cases":0,"replay_manifest":"creator-affiliate-partnership-management/evaluations/historical-replay-template.json","blocking_reason":"No authorized mature creator and affiliate replays are registered."}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version":"1.0",
+  "creator_scenarios":[
+    {"id":"S01","name":"发现与对象去重","lifecycle":["candidate"],"owner":"CAPM","primary_gate":"G1A"},
+    {"id":"S02","name":"身份受益人与品牌安全尽调","lifecycle":["candidate","review"],"owner":"CAPM","primary_gate":"G1A"},
+    {"id":"S03","name":"受众内容与任务匹配","lifecycle":["review","shortlist"],"owner":"CAPM","primary_gate":"G1A"},
+    {"id":"S04","name":"合作模式与经济上限","lifecycle":["shortlist","negotiate"],"owner":"CAPM","primary_gate":"G4"},
+    {"id":"S05","name":"报价BATNA与多轮谈判","lifecycle":["negotiate"],"owner":"CAPM","primary_gate":"G4"},
+    {"id":"S06","name":"寄样货权与履约","lifecycle":["contracted","sample"],"owner":"CAPM","primary_gate":"G5"},
+    {"id":"S07","name":"Brief必做可选禁止与验收","lifecycle":["brief","production"],"owner":"CAPM","primary_gate":"G2"},
+    {"id":"S08","name":"内容权利合同与AI人格用途","lifecycle":["contracted","rights_active"],"owner":"CAPM","primary_gate":"G1B"},
+    {"id":"S09","name":"发布预检披露与平台规则","lifecycle":["preflight","published"],"owner":"CAPM","primary_gate":"G3"},
+    {"id":"S10","name":"交付异常修改补救与争议","lifecycle":["production","acceptance"],"owner":"CAPM","primary_gate":"G3"},
+    {"id":"S11","name":"成熟结果归因与结算","lifecycle":["published","matured","settled"],"owner":"CAPM","primary_gate":"G6"},
+    {"id":"S12","name":"组合集中续约降级淘汰","lifecycle":["matured","renewed","downgraded"],"owner":"CAPM","primary_gate":"G4"},
+    {"id":"S13","name":"事故恢复撤回退出与关系关闭","lifecycle":["incident","recovered","exited"],"owner":"CAPM","primary_gate":"G1A"}
+  ],
+  "affiliate_scenarios":[
+    {"id":"A01","name":"计划架构与网络选择","lifecycle":["design"],"owner":"CAPM","primary_gate":"G4"},
+    {"id":"A02","name":"伙伴发现招募与准入","lifecycle":["candidate","recruited"],"owner":"CAPM","primary_gate":"G1A"},
+    {"id":"A03","name":"入驻激活和首个成熟订单","lifecycle":["onboarded","activated"],"owner":"CAPM","primary_gate":"G6"},
+    {"id":"A04","name":"佣金奖励与经济上限","lifecycle":["active"],"owner":"CAPM","primary_gate":"G4"},
+    {"id":"A05","name":"追踪归因订单守恒和对账","lifecycle":["active","matured"],"owner":"CAPM","primary_gate":"G6"},
+    {"id":"A06","name":"内容品牌词优惠码与渠道冲突","lifecycle":["active","disputed"],"owner":"CAPM","primary_gate":"G3"},
+    {"id":"A07","name":"作弊检测有限冻结申诉恢复","lifecycle":["review","suspended","restored"],"owner":"CAPM","primary_gate":"G1A"},
+    {"id":"A08","name":"伙伴留存清退网络迁移和计划退出","lifecycle":["productive","dormant","exited"],"owner":"CAPM","primary_gate":"G4"}
+  ]
+}

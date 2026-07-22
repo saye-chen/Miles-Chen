@@ -21,5 +21,20 @@ def reconcile(data: dict) -> dict:
             "mature_valid_label": "mature_valid_attributed_orders", "input_hash": sha256_json(data)}
 
 
+def reconcile_touchpoints(data: dict) -> dict:
+    result = reconcile(data)
+    touchpoints = data.get("touchpoints", [])
+    if not isinstance(touchpoints, list): raise ValueError("touchpoints must be an array")
+    seen = set(); duplicated = []
+    for index, item in enumerate(touchpoints):
+        key = (item.get("order_id"), item.get("partner_id"), item.get("touch_type"))
+        if None in key: raise ValueError(f"touchpoints[{index}] missing identity")
+        if key in seen: duplicated.append({"order_id":key[0], "partner_id":key[1], "touch_type":key[2]})
+        seen.add(key)
+    result.update({"touchpoint_duplicates": duplicated, "touchpoint_status":"blocked" if duplicated else "validated",
+                   "incremental_orders": None if result["causal_status"] == "inconclusive" else data.get("incremental_orders")})
+    return result
+
+
 if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("input", nargs="?"); a = p.parse_args(); emit(reconcile(load_json(a.input)))

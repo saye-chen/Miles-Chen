@@ -2,7 +2,7 @@
 from common import main
 from pathlib import Path
 import hashlib,re
-REQUIRED=["case_id","object_id","as_of_time","input_file","input_hash","model_version","decision","observed_outcome","outcome_time","outcome_file","outcome_hash","decision_correct","calibration_notes","source_type","authorization_ref","source_system","reviewer","reviewed_at"]
+REQUIRED=["case_id","object_id","as_of_time","input_file","input_hash","model_version","decision","observed_outcome","outcome_time","outcome_file","outcome_hash","decision_correct","calibration_notes","source_type","authorization_ref","source_system","reviewer","reviewed_at","independent_review","bias_and_calibration","incident_and_rollback","drift_assessment"]
 def digest(path): return hashlib.sha256(path.read_bytes()).hexdigest()
 def run(d):
     cases=d.get("cases",[]);errors=[];ids=set();authorized=0;root=Path(d.get("evidence_root","." )).resolve();allowed=set(d.get("authorization_requirements",{}).get("allowed_source_types",["authorized_historical"]))
@@ -20,6 +20,14 @@ def run(d):
             elif digest(target)!=str(raw).removeprefix("sha256:"): errors.append(f"case_{i}_{kind}_hash_mismatch");artifacts_ok=False
         if c.get("source_type") in allowed and artifacts_ok: authorized+=1
         if c.get("decision_correct") not in [True,False]: errors.append(f"case_{i}_decision_correct_not_boolean")
+        review=c.get("independent_review",{})
+        if not isinstance(review,dict) or review.get("status")!="passed" or not review.get("reviewer_role") or review.get("conflict_of_interest") not in ["none","disclosed_and_mitigated"]: errors.append(f"case_{i}_independent_review_invalid")
+        calibration=c.get("bias_and_calibration",{})
+        if not isinstance(calibration,dict) or "prediction_error" not in calibration or "incorrect_or_surprising_findings" not in calibration: errors.append(f"case_{i}_calibration_invalid")
+        incident=c.get("incident_and_rollback",{})
+        if not isinstance(incident,dict) or not isinstance(incident.get("incident_observed"),bool) or not isinstance(incident.get("rollback_tested"),bool): errors.append(f"case_{i}_incident_rollback_invalid")
+        drift=c.get("drift_assessment",{})
+        if not isinstance(drift,dict) or drift.get("status") not in ["stable","drifted","inconclusive"] or not drift.get("checked_at"): errors.append(f"case_{i}_drift_invalid")
     minimum=int(d.get("minimum_authorized_cases",3))
     if authorized<minimum: errors.append(f"authorized_cases_below_minimum:{authorized}<{minimum}")
     return {"valid":not errors,"errors":errors,"authorized_cases":authorized,"minimum_authorized_cases":minimum,"production_ready":not errors}

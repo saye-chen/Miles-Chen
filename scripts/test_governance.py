@@ -9,6 +9,18 @@ spec = importlib.util.spec_from_file_location("impact", ROOT / "scripts/analyze_
 impact = importlib.util.module_from_spec(spec); assert spec and spec.loader; spec.loader.exec_module(impact)
 
 class ImpactGovernance(unittest.TestCase):
+    def test_eight_domain_maturity_ledger_is_explicit_and_replays_are_blocked(self):
+        status = subprocess.run(["python3", str(ROOT/"scripts/validate_domain_maturity.py")], capture_output=True, text=True)
+        self.assertEqual(status.returncode, 0, (status.stdout, status.stderr))
+        ledger = json.loads((ROOT/"governance/domain-maturity-status.json").read_text(encoding="utf-8"))
+        self.assertEqual(len(ledger["domains"]), 8)
+        self.assertTrue(all(d["maturity"] == "controlled pilot" and d["l4"] == "not_passed" and d["authorized_real_cases"] == 0 for d in ledger["domains"]))
+        for domain in ledger["domains"][:5]:
+            replay = ROOT/domain["replay_manifest"]
+            result = subprocess.run(["python3",str(ROOT/domain["skill"]/"scripts/validate_historical_replay.py"),str(replay)],capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,(domain["skill"],result.stdout,result.stderr))
+            self.assertFalse(json.loads(result.stdout)["production_ready"])
+
     def test_cidm_scoring_change_closes_over_consumers_tests_and_goldens(self):
         result = impact.analyze(["category-investment-decision/references/scoring-model.md"])
         contract = result["affected_contracts"]["cidm-scoring"]
