@@ -59,8 +59,22 @@ def program_profit(data: dict) -> dict:
         raise ValueError("incremental contribution must satisfy low <= mid <= high")
     costs, ids = unique_costs(data.get("program_costs", []))
     profits = [low - costs, mid - costs, high - costs]
-    return {"status": "blocked" if profits[0] < 0 else "validated", "profit_low": profits[0],
-            "profit_mid": profits[1], "profit_high": profits[2], "program_cost": costs, "cost_ids": ids}
+    cash_events = data.get("cash_events", [])
+    if not isinstance(cash_events, list): raise ValueError("cash_events must be an array")
+    balance = require_number(data.get("opening_cash", 0), "opening_cash", minimum=None)
+    trough = balance
+    ordered_events = []
+    for index, event in enumerate(cash_events):
+        if not event.get("event_id") or not event.get("at"): raise ValueError(f"cash_events[{index}] missing event_id or at")
+        amount = require_number(event.get("amount"), f"cash_events[{index}].amount", minimum=None)
+        ordered_events.append((event["at"], event["event_id"], amount))
+    if ordered_events != sorted(ordered_events): raise ValueError("cash_events must be ordered by at and event_id")
+    for _, _, amount in ordered_events:
+        balance += amount; trough = min(trough, balance)
+    status = "blocked" if profits[0] < 0 or trough < 0 else "validated"
+    return {"status": status, "profit_low": profits[0], "profit_mid": profits[1], "profit_high": profits[2],
+            "program_cost": costs, "cost_ids": ids, "cash_trough": trough, "ending_cash": balance,
+            "partner_exit_rule": "marginal_value_and_obligations_review_required"}
 
 
 ACTIONS = {"commission_ceiling": commission_ceiling, "fixed_fee_ceiling": fixed_fee_ceiling,

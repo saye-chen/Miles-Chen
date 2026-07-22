@@ -97,7 +97,7 @@ class FullRepositoryAudit(unittest.TestCase):
    self.assertNotIn(x["primary"],x["participants"]); self.assertTrue(x["must"] and x["forbidden"])
   capm=json.loads((ROOT/"creator-affiliate-partnership-management/evaluations/fixtures/evaluation-catalog.json").read_text())
   cross=[x for x in capm["cases"] if x["mode"]=="cross_skill"]
-  self.assertEqual(len(cross),14); self.assertEqual({p for x in cross for p in x["participants"]},{"CIDM","CIM","VLB","CIG","AAMO","LIFD","PLCO"})
+  self.assertEqual(len(cross),28); self.assertEqual({p for x in cross for p in x["participants"]},{"CIDM","CIM","VLB","CIG","AAMO","LIFD","PLCO"})
 
  def test_07_twelve_extreme_composites_cover_all_skills_and_failure(self):
   rows=json.loads((ROOT/"evaluations/extreme-composite-scenarios.json").read_text())["scenarios"]
@@ -122,7 +122,7 @@ class FullRepositoryAudit(unittest.TestCase):
   self.assertIn("连续追问与增量重算",report); self.assertIn("历史结论不静默覆盖",report)
   capm=json.loads((ROOT/"creator-affiliate-partnership-management/evaluations/fixtures/evaluation-catalog.json").read_text())
   multi=[x for x in capm["cases"] if x["mode"]=="multi_turn"]
-  self.assertEqual(len(multi),12); self.assertTrue(all(len(x["turns"])>=4 for x in multi))
+  self.assertEqual(len(multi),24); self.assertTrue(all(len(x["turns"])>=4 for x in multi))
 
  def test_09_plco_concrete_optimization_cannot_regress(self):
   r=subprocess.run(["python3",str(ROOT/"scripts/test_listing_conversion_stress.py")],capture_output=True,text=True)
@@ -134,7 +134,7 @@ class FullRepositoryAudit(unittest.TestCase):
    if test.name==pathlib.Path(__file__).name: continue
    r=subprocess.run(["python3",str(test)],capture_output=True,text=True)
    self.assertEqual(r.returncode,0,(test.name,r.stdout[-2000:],r.stderr[-2000:]))
-  for validator in ("validate_repo.py","validate_governance_baseline.py"):
+  for validator in ("validate_repo.py","validate_governance_baseline.py","validate_domain_maturity.py","validate_capm_blueprint.py"):
    r=subprocess.run(["python3",str(ROOT/"scripts"/validator)],capture_output=True,text=True)
    self.assertEqual(r.returncode,0,(validator,r.stdout[-2000:],r.stderr[-2000:]))
 

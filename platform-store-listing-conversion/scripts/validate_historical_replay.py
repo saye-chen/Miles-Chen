@@ -14,7 +14,8 @@ REQUIRED = {
     "as_of_time", "authorized_input_file", "input_hash", "frozen_decision",
     "primary_metric", "guardrails", "observed_outcome", "outcome_maturity_time",
     "outcome_hash", "outcome_file", "rollback_was_available", "reviewer",
-    "authorization_ref", "source_type",
+    "authorization_ref", "source_type", "independent_review", "bias_and_calibration",
+    "incident_and_rollback", "drift_assessment",
 }
 FORBIDDEN_SOURCES = {"synthetic", "golden", "fixture", "demo"}
 
@@ -71,6 +72,14 @@ def validate(payload: dict, base: Path) -> dict:
                 errors.append(f"case_{index}_{hash_key}_mismatch"); artifacts_ok = False
         if not case.get("concurrent_changes_recorded"):
             errors.append(f"case_{index}_concurrent_changes_not_recorded")
+        review=case.get("independent_review",{})
+        if not isinstance(review,dict) or review.get("status")!="passed" or not review.get("reviewer_role") or review.get("conflict_of_interest") not in {"none","disclosed_and_mitigated"}: errors.append(f"case_{index}_independent_review_invalid")
+        calibration=case.get("bias_and_calibration",{})
+        if not isinstance(calibration,dict) or "prediction_error" not in calibration or "incorrect_or_surprising_findings" not in calibration: errors.append(f"case_{index}_calibration_invalid")
+        incident=case.get("incident_and_rollback",{})
+        if not isinstance(incident,dict) or not isinstance(incident.get("incident_observed"),bool) or not isinstance(incident.get("rollback_tested"),bool): errors.append(f"case_{index}_incident_rollback_invalid")
+        drift=case.get("drift_assessment",{})
+        if not isinstance(drift,dict) or drift.get("status") not in {"stable","drifted","inconclusive"} or not drift.get("checked_at"): errors.append(f"case_{index}_drift_invalid")
         if artifacts_ok and str(case.get("source_type", "")).lower() not in FORBIDDEN_SOURCES and not missing:
             authorized += 1
 

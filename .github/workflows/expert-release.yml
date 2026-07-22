@@ -43,6 +43,8 @@ jobs:
           python3 scripts/test_advertising_stress.py
           python3 scripts/test_expert_release.py
           python3 scripts/test_governance.py
+          python3 scripts/validate_domain_maturity.py
+          python3 scripts/validate_capm_blueprint.py
           python3 scripts/validate_repo.py
           python3 scripts/test_listing_conversion_stress.py
           python3 creator-affiliate-partnership-management/scripts/test_capm.py

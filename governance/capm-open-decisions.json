@@ -1,0 +1,14 @@
+{
+  "schema_version":"1.0",
+  "as_of_time":"2026-07-22T00:00:00+08:00",
+  "decisions":[
+    {"question":"Does CAPM own paid-media budget and bidding?","decision":"No. CAPM emits a rights and commercial candidate; AAMO owns media action.","status":"resolved"},
+    {"question":"Does a platform-attributed order count as incremental?","decision":"No. It remains attributed unless CIG or AAMO returns C2/C3 evidence.","status":"resolved"},
+    {"question":"Can missing creator data use an industry median?","decision":"No. Missingness lowers quality and the action ceiling.","status":"resolved"},
+    {"question":"Are platform fees and attribution windows normative constants?","decision":"No. They are task-time dynamic facts requiring current official or authorized evidence.","status":"resolved"},
+    {"question":"Can a failed participant domain block all CAPM work?","decision":"Only affected claims and actions are inconclusive or blocked; verified CAPM facts remain usable.","status":"resolved"},
+    {"question":"Who decides legal validity, tax treatment and sanctions clearance?","decision":"Qualified LCR or the named legal/tax owner. CAPM only applies operational gates and escalation.","status":"resolved"},
+    {"question":"Can code fixtures close L4?","decision":"No. L4 requires authorized deidentified mature outcomes, independent review, drift, incident and rollback evidence.","status":"resolved"},
+    {"question":"How many historical replays are sufficient forever?","decision":"Three is only the entry minimum; heterogeneity, risk and drift can require more.","status":"resolved"}
+  ]
+}

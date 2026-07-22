@@ -26,7 +26,11 @@
     "authorization_ref",
     "source_system",
     "reviewer",
-    "reviewed_at"
+    "reviewed_at",
+    "independent_review",
+    "bias_and_calibration",
+    "incident_and_rollback",
+    "drift_assessment"
   ],
   "case_acceptance": {
     "input_predates_decision": true,

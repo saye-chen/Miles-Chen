@@ -7,7 +7,8 @@ from capm_common import emit, load_json
 
 
 REQUIRED = {"case_id", "authorization_reference", "deidentified", "input_hash", "result_hash", "actual_outcome",
-            "maturity_checked_at", "independent_review", "bias_and_calibration", "failure_or_exit_covered"}
+            "maturity_checked_at", "independent_review", "bias_and_calibration", "failure_or_exit_covered",
+            "incident_and_rollback", "drift_assessment"}
 
 
 def validate(data: dict) -> dict:
@@ -28,8 +29,14 @@ def validate(data: dict) -> dict:
         if not isinstance(outcome, dict) or not outcome.get("matured_at") or not outcome.get("measures"):
             errors.append(f"case[{idx}].invalid:actual_outcome")
         calibration = case.get("bias_and_calibration")
-        if not isinstance(calibration, dict) or not calibration.get("prediction_error"):
+        if not isinstance(calibration, dict) or "prediction_error" not in calibration or "incorrect_or_surprising_findings" not in calibration:
             errors.append(f"case[{idx}].invalid:bias_and_calibration")
+        incident = case.get("incident_and_rollback")
+        if not isinstance(incident, dict) or not isinstance(incident.get("incident_observed"), bool) or not isinstance(incident.get("rollback_tested"), bool):
+            errors.append(f"case[{idx}].invalid:incident_and_rollback")
+        drift = case.get("drift_assessment")
+        if not isinstance(drift, dict) or drift.get("status") not in {"stable", "drifted", "inconclusive"} or not drift.get("checked_at"):
+            errors.append(f"case[{idx}].invalid:drift_assessment")
     domains = {case.get("case_type") for case in cases}
     unique = {(c.get("input_hash"), c.get("result_hash")) for c in cases}
     if len(unique) != len(cases): errors.append("duplicate_replay_cases")

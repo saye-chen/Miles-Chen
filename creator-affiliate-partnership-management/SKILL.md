@@ -78,6 +78,9 @@ CAPM 最终决定：
 - 保本、现金、组合、LTV和反事实经济：读 [partnership-economics-cashflow.md](references/partnership-economics-cashflow.md)。
 - 内容权利、合同、AI/人格权、到期、撤回和退出：读 [rights-contract-exit.md](references/rights-contract-exit.md)。
 - 平台/国家路由和动态事实：读 [platform-country-routing.md](references/platform-country-routing.md)。
+- TikTok、Amazon、Shopify/DTC、Shopee、Lazada 平台专属机制与失败恢复：读 [platform-expert-cards.md](references/platform-expert-cards.md)。
+- Brief 最低合同、验收、修改、发布预检和责任归因：读 [brief-acceptance-preflight.md](references/brief-acceptance-preflight.md)。
+- 规模化容量、自动化边界、组合学习和计划退出：读 [scale-operations-and-learning.md](references/scale-operations-and-learning.md)。
 - 未成年人、隐私、制裁、回扣、账号接管、灾害和复合失败：读 [incident-security-continuity.md](references/incident-security-continuity.md)。
 - 联合调用、幂等、冲突、部分失败：读 [skill-integration-protocol.md](references/skill-integration-protocol.md)。
 - 对象、Schema、血缘、权限和自动化：读 [data-contract-and-automation.md](references/data-contract-and-automation.md)。
@@ -121,4 +124,4 @@ CAPM 最终决定：
 
 ## 发布门
 
-完成前运行 quick validation、全部 `test_*.py`、62个可执行深度案例、五类Full Golden报告门、共享跨域/对抗/专业深度/仓库验证和 `git diff --check`。Golden 与合成 fixture 只证明结构和已知推理。L4 至少需要3个授权、脱敏、含实际结果和哈希的历史回放，并通过独立复核、漂移、事故和回滚门；否则保持 `controlled pilot`。
+完成前运行 quick validation、全部 `test_*.py`、120个可执行深度案例及其 Gate/能力/生命周期/结果分布门、五类Full Golden报告门、共享跨域/对抗/专业深度/仓库验证和 `git diff --check`。Golden 与合成 fixture 只证明结构和已知推理。L4 至少需要3个授权、脱敏、含实际结果和哈希的历史回放，并通过独立复核、漂移、事故和回滚门；否则保持 `controlled pilot`。

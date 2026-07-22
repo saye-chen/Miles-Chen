@@ -25,7 +25,11 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
                                (t == "integer" and isinstance(instance, int) and not isinstance(instance, bool)) or
                                (t == "null" and instance is None) for t in types)
     if not type_ok: return [f"{path}:type"]
+    if "const" in schema and instance != schema["const"]: errors.append(f"{path}:const")
     if "enum" in schema and instance not in schema["enum"]: errors.append(f"{path}:enum")
+    if isinstance(instance, (int, float)) and not isinstance(instance, bool):
+        if "minimum" in schema and instance < schema["minimum"]: errors.append(f"{path}:minimum")
+        if "maximum" in schema and instance > schema["maximum"]: errors.append(f"{path}:maximum")
     if isinstance(instance, str):
         if len(instance) < schema.get("minLength", 0): errors.append(f"{path}:minLength")
         if schema.get("pattern") and not re.fullmatch(schema["pattern"], instance): errors.append(f"{path}:pattern")
@@ -35,6 +39,7 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
                 if dt.tzinfo is None: raise ValueError
             except Exception: errors.append(f"{path}:date-time")
     if isinstance(instance, dict):
+        if len(instance) < schema.get("minProperties", 0): errors.append(f"{path}:minProperties")
         for key in schema.get("required", []):
             if key not in instance: errors.append(f"{path}.{key}:required")
         properties = schema.get("properties", {})
@@ -49,6 +54,10 @@ def validate(instance, schema: dict, root: dict | None = None, path: str = "$") 
             encoded = [json.dumps(x, sort_keys=True, ensure_ascii=False) for x in instance]
             if len(encoded) != len(set(encoded)): errors.append(f"{path}:uniqueItems")
         for idx, value in enumerate(instance): errors.extend(validate(value, schema.get("items", {}), root, f"{path}[{idx}]"))
+    for candidate in schema.get("allOf", []): errors.extend(validate(instance, candidate, root, path))
+    if "oneOf" in schema:
+        matches = sum(not validate(instance, candidate, root, path) for candidate in schema["oneOf"])
+        if matches != 1: errors.append(f"{path}:oneOf")
     return errors
 
 

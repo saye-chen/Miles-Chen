@@ -65,9 +65,9 @@
     },
     "eight-skill-governance-baseline": {
       "owner": "repository",
-      "authoritative_sources": ["governance/required-skill-governance.md", "scripts/validate_governance_baseline.py"],
+      "authoritative_sources": ["governance/required-skill-governance.md", "governance/domain-maturity-status.json", "governance/historical-replay.schema.json", "scripts/validate_governance_baseline.py", "scripts/validate_domain_maturity.py"],
       "consumers": ["category-investment-decision", "competitive-intelligence-monitoring", "video-link-breakdown", "consumer-insights-customer-growth", "advertising-analysis-measurement-optimization", "logistics-inventory-fulfillment-decision", "platform-store-listing-conversion", "creator-affiliate-partnership-management", ".github/workflows/expert-release.yml"],
-      "validators": ["scripts/validate_governance_baseline.py", "scripts/validate_repo.py"],
+      "validators": ["scripts/validate_governance_baseline.py", "scripts/validate_domain_maturity.py", "scripts/validate_repo.py"],
       "tests": ["scripts/test_governance.py", "scripts/test_full_repository_audit.py"],
       "evaluations": ["evaluations"]
     },
@@ -121,9 +121,9 @@
     },
     "capm-runtime-and-contracts": {
       "owner": "creator-affiliate-partnership-management",
-      "authoritative_sources": ["creator-affiliate-partnership-management/SKILL.md", "creator-affiliate-partnership-management/references/professional-depth-governance.md", "creator-affiliate-partnership-management/references/skill-integration-protocol.md", "creator-affiliate-partnership-management/references/data-contract-and-automation.md", "creator-affiliate-partnership-management/schemas/cross_skill_envelope.schema.json"],
+      "authoritative_sources": ["creator-affiliate-partnership-management/SKILL.md", "governance/capm-blueprint-implementation-manifest.json", "governance/capm-open-decisions.json", "creator-affiliate-partnership-management/references/professional-depth-governance.md", "creator-affiliate-partnership-management/references/skill-integration-protocol.md", "creator-affiliate-partnership-management/references/data-contract-and-automation.md", "creator-affiliate-partnership-management/references/platform-expert-cards.md", "creator-affiliate-partnership-management/references/brief-acceptance-preflight.md", "creator-affiliate-partnership-management/references/scale-operations-and-learning.md", "creator-affiliate-partnership-management/schemas/cross_skill_envelope.schema.json"],
       "consumers": ["creator-affiliate-partnership-management/agents/openai.yaml", "README.md", "RULES.md", "category-investment-decision", "competitive-intelligence-monitoring", "video-link-breakdown", "consumer-insights-customer-growth", "advertising-analysis-measurement-optimization", "logistics-inventory-fulfillment-decision", "platform-store-listing-conversion"],
-      "validators": ["creator-affiliate-partnership-management/scripts/evaluate_capm_decision.py", "creator-affiliate-partnership-management/scripts/validate_decision_contract.py", "creator-affiliate-partnership-management/scripts/validate_cross_skill_handoff.py", "creator-affiliate-partnership-management/scripts/validate_historical_replay.py", "creator-affiliate-partnership-management/scripts/decision_state.py", "creator-affiliate-partnership-management/scripts/validate_rights_contract.py", "creator-affiliate-partnership-management/scripts/validate_schema_instance.py", "scripts/evaluate_report_quality.py", "scripts/validate_repo.py"],
+      "validators": ["creator-affiliate-partnership-management/scripts/evaluate_capm_decision.py", "creator-affiliate-partnership-management/scripts/validate_capm_contracts.py", "creator-affiliate-partnership-management/scripts/validate_decision_contract.py", "creator-affiliate-partnership-management/scripts/validate_cross_skill_handoff.py", "creator-affiliate-partnership-management/scripts/validate_historical_replay.py", "creator-affiliate-partnership-management/scripts/decision_state.py", "creator-affiliate-partnership-management/scripts/validate_rights_contract.py", "creator-affiliate-partnership-management/scripts/validate_schema_instance.py", "scripts/validate_capm_blueprint.py", "scripts/evaluate_report_quality.py", "scripts/validate_repo.py"],
       "tests": ["creator-affiliate-partnership-management/scripts/test_capm.py", "scripts/test_full_repository_audit.py", "scripts/test_cross_skill_integration.py", "scripts/test_professional_depth.py"],
       "evaluations": ["creator-affiliate-partnership-management/evaluations/fixtures/evaluation-catalog.json", "creator-affiliate-partnership-management/evaluations/golden", "creator-affiliate-partnership-management/evaluations/historical-replay-template.json"]
     }

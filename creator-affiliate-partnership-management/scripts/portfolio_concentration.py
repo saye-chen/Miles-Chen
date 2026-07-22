@@ -23,5 +23,15 @@ def calculate(data: dict) -> dict:
             "top1_share": ordered[0], "top3_share": sum(ordered[:3]), "input_hash": sha256_json(data)}
 
 
+def calculate_multi_basis(data: dict) -> dict:
+    bases = data.get("bases")
+    if not isinstance(bases, dict) or not bases:
+        raise ValueError("bases must be a non-empty object")
+    results = {name: calculate({"basis": name, "values": values}) for name, values in bases.items()}
+    highest = max(results, key=lambda name: results[name]["hhi"])
+    return {"status": "validated", "bases": results, "highest_hhi_basis": highest,
+            "single_basis_decision_forbidden": len(results) < 2, "input_hash": sha256_json(data)}
+
+
 if __name__ == "__main__":
     p = argparse.ArgumentParser(); p.add_argument("input", nargs="?"); a = p.parse_args(); emit(calculate(load_json(a.input)))

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eight-domain historical replay manifest",
+  "type": "object",
+  "required": ["schema_version", "skill", "runtime_version", "production_ready", "minimum_authorized_cases", "cases"],
+  "properties": {
+    "schema_version": {"const": "historical-replay-1.0"},
+    "skill": {"type": "string", "minLength": 1},
+    "runtime_version": {"type": "string", "pattern": "^[A-Z]+-20[0-9]{2}\\.[0-9]{2}$"},
+    "production_ready": {"type": "boolean"},
+    "minimum_authorized_cases": {"type": "integer", "minimum": 3},
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["case_id", "case_type", "authorization_reference", "deidentified", "input_hash", "result_hash", "actual_outcome", "maturity_checked_at", "independent_review", "bias_and_calibration", "incident_and_rollback", "drift_assessment"],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "case_type": {"type": "string", "minLength": 1},
+          "authorization_reference": {"type": "string", "minLength": 1},
+          "deidentified": {"const": true},
+          "input_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "result_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "actual_outcome": {"type": "object", "required": ["matured_at", "measures"], "properties": {"matured_at": {"type": "string", "format": "date-time"}, "measures": {"type": "object", "minProperties": 1}}},
+          "maturity_checked_at": {"type": "string", "format": "date-time"},
+          "independent_review": {"type": "object", "required": ["status", "reviewer_role", "conflict_of_interest", "reviewed_at"], "properties": {"status": {"const": "passed"}, "reviewer_role": {"type": "string", "minLength": 1}, "conflict_of_interest": {"enum": ["none", "disclosed_and_mitigated"]}, "reviewed_at": {"type": "string", "format": "date-time"}}},
+          "bias_and_calibration": {"type": "object", "required": ["prediction_error", "incorrect_or_surprising_findings"], "properties": {"prediction_error": {}, "incorrect_or_surprising_findings": {"type": "array"}}},
+          "incident_and_rollback": {"type": "object", "required": ["incident_observed", "rollback_tested"], "properties": {"incident_observed": {"type": "boolean"}, "rollback_tested": {"type": "boolean"}}},
+          "drift_assessment": {"type": "object", "required": ["checked_at", "status"], "properties": {"checked_at": {"type": "string", "format": "date-time"}, "status": {"enum": ["stable", "drifted", "inconclusive"]}}}
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

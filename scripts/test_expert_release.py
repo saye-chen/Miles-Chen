@@ -114,7 +114,7 @@ class CrossSkillScenarioGate(unittest.TestCase):
         for scenario in SCENARIOS:
             self.assertNotIn(scenario["primary"], scenario["participants"], scenario["id"])
 
-    def test_all_core_seven_skills_are_exercised_and_inventory_conflict_routes_lifd(self):
+    def test_all_core_eight_skills_are_exercised_and_inventory_conflict_routes_lifd(self):
         exercised = {s["primary"] for s in SCENARIOS}
         exercised |= {p for s in SCENARIOS for p in s["participants"]}
         self.assertEqual(exercised, set(SKILLS))

@@ -12,6 +12,9 @@ REQUIRED = {"contract_id", "contract_version", "message_id", "correlation_id", "
             "calculation_ids", "allowed_uses", "forbidden_uses", "blocked_actions", "accepted_by_receiver",
             "lineage", "validity", "payload", "idempotency_key"}
 
+def input_lineage_hash(data: dict) -> str:
+    return sha256_json({key:data.get(key) for key in ("contract_id","contract_version","sender","receiver","object","scope","source_evidence_level","causal_evidence_level","claim_ids","evidence_ids","calculation_ids","allowed_uses","forbidden_uses","payload")})
+
 
 def validate(data: dict, seen_idempotency_keys: set[str] | None = None) -> dict:
     errors = []
@@ -51,6 +54,8 @@ def validate(data: dict, seen_idempotency_keys: set[str] | None = None) -> dict:
         value = lineage.get(field, "")
         if len(value) != 64 or any(c not in "0123456789abcdef" for c in value.lower()):
             errors.append(f"invalid:{field}")
+    if lineage.get("input_hash") != input_lineage_hash(data):
+        errors.append("invalid:input_hash_mismatch")
     receiver = data.get("receiver", {})
     accepted = data.get("accepted_by_receiver", {}).get("status")
     if receiver.get("runtime_version") == "unavailable" and accepted == "accepted":

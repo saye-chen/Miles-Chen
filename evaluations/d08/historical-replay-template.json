@@ -21,7 +21,11 @@
     "concurrent_changes_recorded",
     "reviewer",
     "authorization_ref",
-    "source_type"
+    "source_type",
+    "independent_review",
+    "bias_and_calibration",
+    "incident_and_rollback",
+    "drift_assessment"
   ],
   "acceptance": {
     "deidentified": true,
